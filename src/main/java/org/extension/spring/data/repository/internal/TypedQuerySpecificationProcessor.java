@@ -1,6 +1,6 @@
-package com.bea.spring.repository.internal.specification;
+package org.extension.spring.data.repository.internal;
 
-import com.bea.spring.repository.TypedQuerySpecification;
+import org.extension.spring.data.repository.specification.TypedQuerySpecification;
 
 import javax.persistence.EntityManager;
 import javax.persistence.TypedQuery;
@@ -8,7 +8,9 @@ import java.util.Objects;
 
 class TypedQuerySpecificationProcessor {
 
-    public static <T> TypedQuery<T> process(EntityManager entityManager, Class<T> domainClass, TypedQuerySpecification<T> specification) {
+    private TypedQuerySpecificationProcessor() {}
+
+    static <T> TypedQuery<T> process(EntityManager entityManager, Class<T> domainClass, TypedQuerySpecification<T> specification) {
         Objects.requireNonNull(entityManager);
         Objects.requireNonNull(domainClass);
         Objects.requireNonNull(specification);

@@ -1,14 +1,16 @@
-package com.bea.spring.repository.internal.specification;
+package org.extension.spring.data.repository.internal;
 
-import com.bea.spring.repository.PlainQuerySpecification;
+import org.extension.spring.data.repository.specification.QuerySpecification;
 
 import javax.persistence.EntityManager;
 import javax.persistence.Query;
 import java.util.Objects;
 
-class PlainQuerySpecificationProcessor {
+class QuerySpecificationProcessor {
 
-    public static Query process(EntityManager entityManager, PlainQuerySpecification specification) {
+    private QuerySpecificationProcessor() {}
+
+    static Query process(EntityManager entityManager, QuerySpecification specification) {
         Objects.requireNonNull(entityManager);
         Objects.requireNonNull(specification);
 
