@@ -15,7 +15,7 @@ class QuerySpecificationProcessor {
         Objects.requireNonNull(specification);
 
         final Query query = entityManager.createQuery(specification.query());
-        specification.toPredicate(query);
+        specification.withPredicate(query);
         return query;
     }
 }

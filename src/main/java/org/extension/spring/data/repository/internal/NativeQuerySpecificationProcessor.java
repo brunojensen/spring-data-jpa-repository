@@ -15,7 +15,7 @@ class NativeQuerySpecificationProcessor {
         Objects.requireNonNull(specification);
 
         final Query query = entityManager.createNativeQuery(specification.query());
-        specification.toPredicate(query);
+        specification.withPredicate(query);
         return query;
     }
 }

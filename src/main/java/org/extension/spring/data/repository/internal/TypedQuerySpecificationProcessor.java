@@ -16,7 +16,7 @@ class TypedQuerySpecificationProcessor {
         Objects.requireNonNull(specification);
 
         final TypedQuery<T> query = entityManager.createQuery(specification.query(), domainClass);
-        specification.toPredicate(query);
+        specification.withPredicate(query);
         return query;
     }
 }

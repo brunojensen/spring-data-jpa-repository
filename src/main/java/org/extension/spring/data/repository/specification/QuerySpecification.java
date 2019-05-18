@@ -9,7 +9,7 @@ public interface QuerySpecification extends Specification {
 
     String query();
 
-    void toPredicate(Query query);
+    default void withPredicate(Query query) {}
 
     @Override
     default QueryType type() {

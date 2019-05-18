@@ -1,8 +1,10 @@
 package org.extension.spring.data.repository.internal;
 
 import org.extension.spring.data.repository.RepositorySpecificationExecutor;
-import org.extension.spring.data.repository.internal.enumeration.QueryType;
 import org.extension.spring.data.repository.internal.specification.Specification;
+import org.extension.spring.data.repository.specification.QuerySpecification;
+import org.extension.spring.data.repository.specification.TypedNativeQuerySpecification;
+import org.extension.spring.data.repository.specification.TypedQuerySpecification;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
@@ -12,9 +14,6 @@ import org.springframework.data.jpa.repository.support.JpaEntityInformation;
 import org.springframework.data.jpa.repository.support.SimpleJpaRepository;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
-import org.extension.spring.data.repository.specification.QuerySpecification;
-import org.extension.spring.data.repository.specification.TypedNativeQuerySpecification;
-import org.extension.spring.data.repository.specification.TypedQuerySpecification;
 
 import javax.persistence.EntityManager;
 import javax.persistence.Query;
@@ -56,18 +55,18 @@ public class RepositorySpecificationExecutorImpl<T, ID extends Serializable>
     public <P> P find(Specification specification, Class<P> projectionType) {
         if (specification.isSatisfied()) {
             switch (specification.type()) {
-                case QueryType.TYPED:
+                case TYPED:
                     return TypedQuerySpecificationProcessor
                             .process(entityManager, projectionType, (TypedQuerySpecification<P>) specification)
                             .getSingleResult();
-                case QueryType.TYPED_NATIVE:
+                case TYPED_NATIVE:
                     return (P) TypedNativeQuerySpecificationProcessor
                             .process(entityManager, projectionType, (TypedNativeQuerySpecification<P>) specification)
                             .getSingleResult();
-                case QueryType.CRITERIA:
+                case CRITERIA:
                     return (P) super.findOne((org.springframework.data.jpa.domain.Specification<T>) specification);
-                case QueryType.NATIVE:
-                case QueryType.PLAIN:
+                case NATIVE:
+                case PLAIN:
                 default:
                     throw new IllegalArgumentException(String.format(Constants.NOT_SUPPORTED, specification.type()));
             }
@@ -80,18 +79,18 @@ public class RepositorySpecificationExecutorImpl<T, ID extends Serializable>
     public <P> List<P> findAll(Specification specification, Class<P> projectionType) {
         if (specification.isSatisfied()) {
             switch (specification.type()) {
-                case QueryType.TYPED:
+                case TYPED:
                     return TypedQuerySpecificationProcessor
                             .process(entityManager, projectionType, (TypedQuerySpecification<P>) specification)
                             .getResultList();
-                case QueryType.CRITERIA:
+                case CRITERIA:
                     return super.findAll((org.springframework.data.jpa.domain.Specification) specification);
-                case QueryType.TYPED_NATIVE:
+                case TYPED_NATIVE:
                     return TypedNativeQuerySpecificationProcessor
                             .process(entityManager, projectionType, (TypedNativeQuerySpecification<P>) specification)
                             .getResultList();
-                case QueryType.NATIVE:
-                case QueryType.PLAIN:
+                case NATIVE:
+                case PLAIN:
                 default:
                     throw new IllegalArgumentException(String.format(Constants.NOT_SUPPORTED, specification.type()));
             }
@@ -104,7 +103,7 @@ public class RepositorySpecificationExecutorImpl<T, ID extends Serializable>
     public <P> Page<P> findAll(Specification specification, Pageable pageable, Class<P> projectionType) {
         if (specification.isSatisfied()) {
             switch (specification.type()) {
-                case QueryType.TYPED:
+                case TYPED:
                     final TypedQuerySpecification<P> typedQuerySpecification = (TypedQuerySpecification<P>) specification;
                     return new PageImpl<>(
                             TypedQuerySpecificationProcessor
@@ -112,7 +111,7 @@ public class RepositorySpecificationExecutorImpl<T, ID extends Serializable>
                                     .setFirstResult((int) pageable.getOffset())
                                     .setMaxResults(pageable.getPageSize())
                                     .getResultList(), pageable, count(new CountQueryFor(typedQuerySpecification)));
-                case QueryType.TYPED_NATIVE:
+                case TYPED_NATIVE:
                     final TypedNativeQuerySpecification<P> typedNativeQuerySpecification = (TypedNativeQuerySpecification<P>) specification;
                     return new PageImpl<>(
                             TypedNativeQuerySpecificationProcessor
@@ -120,10 +119,10 @@ public class RepositorySpecificationExecutorImpl<T, ID extends Serializable>
                                     .setFirstResult((int) pageable.getOffset())
                                     .setMaxResults(pageable.getPageSize())
                                     .getResultList(), pageable, count(new CountQueryFor(typedNativeQuerySpecification)));
-                case QueryType.CRITERIA:
+                case CRITERIA:
                     return findAll((org.springframework.data.jpa.domain.Specification) specification, pageable);
-                case QueryType.PLAIN:
-                case QueryType.NATIVE:
+                case PLAIN:
+                case NATIVE:
                 default:
                     throw new IllegalArgumentException(String.format(Constants.NOT_SUPPORTED, specification.type()));
             }
@@ -135,19 +134,19 @@ public class RepositorySpecificationExecutorImpl<T, ID extends Serializable>
     public long count(Specification specification) {
         if (specification.isSatisfied()) {
             switch (specification.type()) {
-                case QueryType.PLAIN:
-                case QueryType.TYPED:
-                case QueryType.TYPED_NATIVE:
+                case PLAIN:
+                case TYPED:
+                case TYPED_NATIVE:
                     return ((Number) QuerySpecificationProcessor
                             .process(entityManager, new CountQueryFor((QuerySpecification) specification))
                             .getSingleResult())
                             .longValue();
-                case QueryType.NATIVE:
+                case NATIVE:
                     return ((Number) NativeQuerySpecificationProcessor
                             .process(entityManager, new CountQueryFor((QuerySpecification) specification))
                             .getSingleResult())
                             .longValue();
-                case QueryType.CRITERIA:
+                case CRITERIA:
                 default:
                     return count((org.springframework.data.jpa.domain.Specification) specification);
             }
@@ -170,8 +169,8 @@ public class RepositorySpecificationExecutorImpl<T, ID extends Serializable>
         }
 
         @Override
-        public void toPredicate(Query query) {
-            querySpecification.toPredicate(query);
+        public void withPredicate(Query query) {
+            querySpecification.withPredicate(query);
         }
     }
 
@@ -192,8 +191,8 @@ public class RepositorySpecificationExecutorImpl<T, ID extends Serializable>
         }
 
         @Override
-        public void toPredicate(Query query) {
-            typedQuerySpecification.toPredicate(query);
+        public void withPredicate(Query query) {
+            typedQuerySpecification.withPredicate(query);
         }
     }
 }
