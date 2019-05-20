@@ -1,8 +1,8 @@
 package org.extension.spring.data.repository.internal;
 
 import org.extension.spring.data.repository.RepositorySpecificationExecutor;
-import org.extension.spring.data.repository.internal.specification.Specification;
 import org.extension.spring.data.repository.specification.QuerySpecification;
+import org.extension.spring.data.repository.specification.Specification;
 import org.extension.spring.data.repository.specification.TypedNativeQuerySpecification;
 import org.extension.spring.data.repository.specification.TypedQuerySpecification;
 import org.springframework.data.domain.Page;
@@ -165,7 +165,7 @@ public class RepositorySpecificationExecutorImpl<T, ID extends Serializable>
         @SuppressWarnings("deprecation")
         @Override
         public String query() {
-            return QueryUtils.createCountQueryFor(querySpecification.query());
+            return QueryUtils.createCountQueryFor(querySpecification.query(), "*".equals(QueryUtils.getProjection(querySpecification.query())) ? "1" : null);
         }
 
         @Override

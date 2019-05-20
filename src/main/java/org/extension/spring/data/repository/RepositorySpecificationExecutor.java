@@ -1,6 +1,6 @@
 package org.extension.spring.data.repository;
 
-import org.extension.spring.data.repository.internal.specification.Specification;
+import org.extension.spring.data.repository.specification.Specification;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.repository.NoRepositoryBean;
