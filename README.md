@@ -35,10 +35,6 @@ public List<Person> searchBy(final Person person) {
         public String query() {
             return "FROM Person";
         }
-
-        @Override
-        public void toPredicate(Query query) {
-        }
     });
 }
 
@@ -47,10 +43,6 @@ public long countBy(final Person person) {
         @Override
         public String query() {
             return "SELECT count(*) FROM Person";
-        }
-
-        @Override
-        public void toPredicate(Query query) {
         }
     });
 }
