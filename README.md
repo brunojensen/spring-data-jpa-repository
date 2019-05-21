@@ -1,6 +1,6 @@
 # spring-data-repository
 
-Specification repository API for complex quering... read again COMPLEX QUERING...
+Specification repository API for complex queries by making use of Repository and Specification patterns
 
 Demo:
 https://github.com/brunojensen/spring-data-repository-demo
