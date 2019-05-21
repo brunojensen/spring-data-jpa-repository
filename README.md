@@ -22,7 +22,10 @@ Usage:
 
 ```java
 
-public interface PersonRepository extends RepositorySpecificationExecutor<Person, String> { }
+public interface PersonRepository extends RepositorySpecificationExecutor<Person, String> {
+  // you still can use spring-data common Repository implementations
+  // this framework is only giving you a boost
+}
 
 ```
 
@@ -45,7 +48,7 @@ public List<Person> searchBy(final Person person) {
 
 public long countBy(final Person person) {
     // it requires casting for lamba expressions.
-    return repository.count((TypedQuerySpecification<Person>) () -> "SELECT count(*) FROM Person");
+    return repository.count((QuerySpecification) () -> "SELECT count(*) FROM Person");
 }
 
 public Person findById(String id) {
