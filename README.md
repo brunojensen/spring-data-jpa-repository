@@ -33,18 +33,19 @@ public List<Person> searchBy(final Person person) {
     return repository.searchBy(new TypedQuerySpecification<Person>() {
         @Override
         public String query() {
-            return "FROM Person";
+            return "FROM Person WHERE name = :name";
+        }
+
+        @Override
+        public void withPredicate(Query query) {
+            query.setParameter(“name”, “John”);
         }
     });
 }
 
 public long countBy(final Person person) {
-    return repository.count(new TypedQuerySpecification<Person>() {
-        @Override
-        public String query() {
-            return "SELECT count(*) FROM Person";
-        }
-    });
+    // it requires casting for lamba expressions.
+    return repository.count((TypedQuerySpecification<Person>) () -> "SELECT count(*) FROM Person");
 }
 
 public Person findById(String id) {
