@@ -1,4 +1,4 @@
-# spring-data-repository
+# spring-data-jpa-repository
 
 Specification repository API for complex queries by making use of Repository and Specification patterns. 
 
@@ -36,6 +36,12 @@ public interface PersonRepository extends RepositorySpecificationExecutor<Person
 
 public List<Person> searchBy(final Person person) {
     return repository.searchBy(new TypedQuerySpecification<Person>() {
+        
+        @Override
+        public boolean isSatisfied() {
+           return null != person && null != person.getName()
+        }
+
         @Override
         public String query() {
             return "FROM Person WHERE name = :name";
@@ -43,7 +49,7 @@ public List<Person> searchBy(final Person person) {
 
         @Override
         public void withPredicate(Query query) {
-            query.setParameter(“name”, “John”);
+            query.setParameter(“name”, person.getName());
         }
     });
 }
