@@ -1,6 +1,6 @@
 # spring-data-repository
 
-Specification repository API for complex queries by making use of Repository and Specification patterns
+Specification repository API for complex queries by making use of Repository and Specification patterns. 
 
 Demo:
 https://github.com/brunojensen/spring-data-repository-demo
@@ -46,16 +46,16 @@ public List<Person> searchBy(final Person person) {
     });
 }
 
-public long countBy(final Person person) {
+public long countAll() {
     // it requires casting for lamba expressions.
     return repository.count((QuerySpecification) () -> "SELECT count(*) FROM Person");
 }
 
-public Person findById(String id) {
+public Person findByEmail(String email) {
     return repository.findBy(new CriteriaQuerySpecification<Person>() {
         @Override
         public Predicate toPredicate(Root<Person> r, CriteriaQuery<?> cq, CriteriaBuilder cb) {
-            return cb.equal(r.get("email"), id);
+            return cb.equal(r.get("email"), email);
         }
     });
 }
