@@ -2,6 +2,8 @@
 
 Specification repository API for complex queries by making use of Repository and Specification patterns. 
 
+[![Build Status](https://travis-ci.org/brunojensen/spring-data-jpa-repository.svg?branch=master)](https://travis-ci.org/brunojensen/spring-data-jpa-repository)
+
 Demo:
 https://github.com/brunojensen/spring-data-repository-demo
 
