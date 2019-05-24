@@ -1,3 +1,9 @@
 language: java
-
-install: mvn clean install -U
+addons:
+  sonarcloud:
+    organization: "brunojensen-github" # the key of the org you chose at step #3
+    token:
+      secure: "1ce723a0f8793cbf9eea78fab2d2fb23f775ebcd" # encrypted value of your token
+script:
+  # the following command line builds the project, runs the tests with coverage and then execute the SonarCloud analysis
+  - mvn clean org.jacoco:jacoco-maven-plugin:prepare-agent install sonar:sonar
