@@ -7,13 +7,13 @@ import org.extension.spring.data.repository.internal.enumeration.QueryType;
  */
 public interface NativeQuerySpecification extends QuerySpecification {
 
-    /**
-     * Don't override me.
-     *
-     * @return in case of {@link NativeQuerySpecification} must return NATIVE
-     */
-    @Override
-    default QueryType type() {
-        return QueryType.NATIVE;
-    }
+  /**
+   * Don't override me.
+   *
+   * @return in case of {@link NativeQuerySpecification} must return NATIVE
+   */
+  @Override
+  default QueryType type() {
+    return QueryType.NATIVE;
+  }
 }

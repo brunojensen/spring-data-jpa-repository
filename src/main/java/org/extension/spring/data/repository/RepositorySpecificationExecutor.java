@@ -1,29 +1,29 @@
 package org.extension.spring.data.repository;
 
+import java.io.Serializable;
+import java.util.List;
 import org.extension.spring.data.repository.specification.Specification;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.repository.NoRepositoryBean;
 import org.springframework.data.repository.Repository;
 
-import java.io.Serializable;
-import java.util.List;
-
 @NoRepositoryBean
-public interface RepositorySpecificationExecutor<T, I extends Serializable> extends Repository<T, I> {
+public interface RepositorySpecificationExecutor<T, I extends Serializable> extends
+    Repository<T, I> {
 
-    T find(Specification specification);
+  T find(Specification specification);
 
-    List<T> findAll(Specification specification);
+  List<T> findAll(Specification specification);
 
-    Page<T> findAll(Specification specification, Pageable pageable);
+  Page<T> findAll(Specification specification, Pageable pageable);
 
-    <P> P find(Specification specification, Class<P> projectionType);
+  <P> P find(Specification specification, Class<P> projectionType);
 
-    <P> List<P> findAll(Specification specification, Class<P> projectionType);
+  <P> List<P> findAll(Specification specification, Class<P> projectionType);
 
-    <P> Page<P> findAll(Specification specification, Pageable pageable, Class<P> projectionType);
+  <P> Page<P> findAll(Specification specification, Pageable pageable, Class<P> projectionType);
 
-    long count(Specification specification);
+  long count(Specification specification);
 
 }
