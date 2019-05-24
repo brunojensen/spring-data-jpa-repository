@@ -53,7 +53,7 @@ public class RepositorySpecificationExecutorImplTest {
                 .thenReturn(Collections.emptyList());
 
         repositorySpecificationExecutor.findAll(
-            (TypedQuerySpecification<Person>) () -> jpql
+            (TypedQuerySpecification) () -> jpql
         );
 
         verify(entityManager).createQuery(eq(jpql), eq(Person.class));
@@ -73,7 +73,7 @@ public class RepositorySpecificationExecutorImplTest {
         when(typedQuery.getResultList())
                 .thenReturn(Collections.emptyList());
 
-        repositorySpecificationExecutor.findAll(new TypedQuerySpecification<Person>() {
+        repositorySpecificationExecutor.findAll(new TypedQuerySpecification() {
             @Override
             public String query() {
                 return jpql;
@@ -157,7 +157,7 @@ public class RepositorySpecificationExecutorImplTest {
                 .thenReturn(Collections.emptyList());
 
         repositorySpecificationExecutor.findAll(
-                (TypedNativeQuerySpecification<Person>) () -> jpql
+                (TypedNativeQuerySpecification) () -> jpql
         );
 
         verify(entityManager).createNativeQuery(eq(jpql), eq(Person.class));
@@ -178,7 +178,7 @@ public class RepositorySpecificationExecutorImplTest {
                 .thenReturn(Collections.emptyList());
 
         repositorySpecificationExecutor.findAll(
-                (TypedNativeQuerySpecification<PersonResultMapping>) () -> jpql, PersonResultMapping.class
+                (TypedNativeQuerySpecification) () -> jpql, PersonResultMapping.class
         );
 
         verify(entityManager).createNativeQuery(eq(jpql), eq("PersonResultMapping"));
@@ -233,7 +233,7 @@ public class RepositorySpecificationExecutorImplTest {
         }
     }
 
-    private class PersonSpecification implements TypedQuerySpecification<Person> {
+    private class PersonSpecification implements TypedQuerySpecification {
 
         private String jpql;
 

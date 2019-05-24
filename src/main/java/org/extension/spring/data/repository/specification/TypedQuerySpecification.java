@@ -5,7 +5,7 @@ import org.extension.spring.data.repository.internal.enumeration.QueryType;
 /**
  * Specification to JPQL queries
  */
-public interface TypedQuerySpecification<E> extends QuerySpecification {
+public interface TypedQuerySpecification extends QuerySpecification {
 
     /**
      * Don't override me.

@@ -10,7 +10,7 @@ class TypedQuerySpecificationProcessor {
 
     private TypedQuerySpecificationProcessor() {}
 
-    static <T> TypedQuery<T> process(EntityManager entityManager, Class<T> domainClass, TypedQuerySpecification<T> specification) {
+    static <T> TypedQuery<T> process(EntityManager entityManager, Class<T> domainClass, TypedQuerySpecification specification) {
         Objects.requireNonNull(entityManager);
         Objects.requireNonNull(domainClass);
         Objects.requireNonNull(specification);

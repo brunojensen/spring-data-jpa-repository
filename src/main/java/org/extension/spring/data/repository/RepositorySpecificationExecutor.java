@@ -10,7 +10,7 @@ import java.io.Serializable;
 import java.util.List;
 
 @NoRepositoryBean
-public interface RepositorySpecificationExecutor<T, ID extends Serializable> extends Repository<T, ID> {
+public interface RepositorySpecificationExecutor<T, I extends Serializable> extends Repository<T, I> {
 
     T find(Specification specification);
 

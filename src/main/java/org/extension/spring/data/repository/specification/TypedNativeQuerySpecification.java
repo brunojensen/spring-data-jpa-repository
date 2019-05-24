@@ -9,7 +9,7 @@ import org.extension.spring.data.repository.internal.enumeration.QueryType;
  * or with the JPA entity.
  * </p>
  */
-public interface TypedNativeQuerySpecification<E> extends QuerySpecification {
+public interface TypedNativeQuerySpecification extends QuerySpecification {
 
     /**
      * Don't override me.

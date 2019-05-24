@@ -23,8 +23,8 @@ import java.util.List;
 
 @Repository
 @Transactional(readOnly = true)
-public class RepositorySpecificationExecutorImpl<T, ID extends Serializable>
-        extends SimpleJpaRepository<T, ID> implements RepositorySpecificationExecutor<T, ID> {
+public class RepositorySpecificationExecutorImpl<T, I extends Serializable>
+        extends SimpleJpaRepository<T, I> implements RepositorySpecificationExecutor<T, I> {
 
     private final EntityManager entityManager;
 
@@ -57,11 +57,11 @@ public class RepositorySpecificationExecutorImpl<T, ID extends Serializable>
             switch (specification.type()) {
                 case TYPED:
                     return TypedQuerySpecificationProcessor
-                            .process(entityManager, projectionType, (TypedQuerySpecification<P>) specification)
+                            .process(entityManager, projectionType, (TypedQuerySpecification) specification)
                             .getSingleResult();
                 case TYPED_NATIVE:
                     return (P) TypedNativeQuerySpecificationProcessor
-                            .process(entityManager, projectionType, (TypedNativeQuerySpecification<P>) specification)
+                            .process(entityManager, projectionType, (TypedNativeQuerySpecification) specification)
                             .getSingleResult();
                 case CRITERIA:
                     return (P) super.findOne((org.springframework.data.jpa.domain.Specification<T>) specification);
@@ -81,13 +81,13 @@ public class RepositorySpecificationExecutorImpl<T, ID extends Serializable>
             switch (specification.type()) {
                 case TYPED:
                     return TypedQuerySpecificationProcessor
-                            .process(entityManager, projectionType, (TypedQuerySpecification<P>) specification)
+                            .process(entityManager, projectionType, (TypedQuerySpecification) specification)
                             .getResultList();
                 case CRITERIA:
                     return super.findAll((org.springframework.data.jpa.domain.Specification) specification);
                 case TYPED_NATIVE:
                     return TypedNativeQuerySpecificationProcessor
-                            .process(entityManager, projectionType, (TypedNativeQuerySpecification<P>) specification)
+                            .process(entityManager, projectionType, (TypedNativeQuerySpecification) specification)
                             .getResultList();
                 case NATIVE:
                 case PLAIN:
@@ -104,15 +104,15 @@ public class RepositorySpecificationExecutorImpl<T, ID extends Serializable>
         if (specification.isSatisfied()) {
             switch (specification.type()) {
                 case TYPED:
-                    final TypedQuerySpecification<P> typedQuerySpecification = (TypedQuerySpecification<P>) specification;
+                    final TypedQuerySpecification typedQuerySpecification = (TypedQuerySpecification) specification;
                     return new PageImpl<>(
                             TypedQuerySpecificationProcessor
-                                    .process(entityManager, projectionType, new SortQueryFor<>(typedQuerySpecification, pageable.getSort()))
+                                    .process(entityManager, projectionType, new SortQueryFor(typedQuerySpecification, pageable.getSort()))
                                     .setFirstResult((int) pageable.getOffset())
                                     .setMaxResults(pageable.getPageSize())
                                     .getResultList(), pageable, count(new CountQueryFor(typedQuerySpecification)));
                 case TYPED_NATIVE:
-                    final TypedNativeQuerySpecification<P> typedNativeQuerySpecification = (TypedNativeQuerySpecification<P>) specification;
+                    final TypedNativeQuerySpecification typedNativeQuerySpecification = (TypedNativeQuerySpecification) specification;
                     return new PageImpl<>(
                             TypedNativeQuerySpecificationProcessor
                                     .process(entityManager, projectionType, typedNativeQuerySpecification)
@@ -162,10 +162,13 @@ public class RepositorySpecificationExecutorImpl<T, ID extends Serializable>
             this.querySpecification = querySpecification;
         }
 
-        @SuppressWarnings("deprecation")
+        // Spring mark a deprecation on the org.springframework.data.jpa.repository.query.QueryUtils#createCountQueryFor
+        // but didn't provide any public implementation alternative.
+        @SuppressWarnings({"deprecation", "squid:CallToDeprecatedMethod"})
         @Override
         public String query() {
-            return QueryUtils.createCountQueryFor(querySpecification.query(), "*".equals(QueryUtils.getProjection(querySpecification.query())) ? "1" : null);
+            return QueryUtils.createCountQueryFor(querySpecification.query(),
+                    "*".equals(QueryUtils.getProjection(querySpecification.query())) ? "1" : null);
         }
 
         @Override
@@ -174,13 +177,13 @@ public class RepositorySpecificationExecutorImpl<T, ID extends Serializable>
         }
     }
 
-    private static final class SortQueryFor<T> implements TypedQuerySpecification<T> {
+    private static final class SortQueryFor implements TypedQuerySpecification {
 
-        private final TypedQuerySpecification<T> typedQuerySpecification;
+        private final TypedQuerySpecification typedQuerySpecification;
         private final Sort sort;
 
 
-        SortQueryFor(final TypedQuerySpecification<T> typedQuerySpecification, final Sort sort) {
+        SortQueryFor(final TypedQuerySpecification typedQuerySpecification, final Sort sort) {
             this.typedQuerySpecification = typedQuerySpecification;
             this.sort = sort;
         }
