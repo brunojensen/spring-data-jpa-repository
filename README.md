@@ -60,7 +60,7 @@ public long countAll() {
 }
 
 public Person findByEmail(String email) {
-    return repository.findBy(new CriteriaQuerySpecification<Person>() {
+    return repository.find(new CriteriaQuerySpecification<Person>() {
         @Override
         public Predicate toPredicate(Root<Person> r, CriteriaQuery<?> cq, CriteriaBuilder cb) {
             return cb.equal(r.get("email"), email);
