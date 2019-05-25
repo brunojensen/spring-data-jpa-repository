@@ -55,9 +55,9 @@ public class RepositorySpecificationExecutorImplTest {
   @Test
   public void testFindAllWithTypedQuerySpecification_paging() {
 
-    final String jpql = "SELECT email FROM Person p";
+    final String jpql = "SELECT p FROM Person p";
 
-    final String jpqlSorted = "SELECT email FROM Person p order by p.email asc";
+    final String jpqlSorted = "SELECT p FROM Person p order by p.email asc";
 
     final TypedQuery typedQuery = mock(TypedQuery.class);
 
@@ -243,7 +243,7 @@ public class RepositorySpecificationExecutorImplTest {
   }
 
   @Test
-  public void testFindQuerySpecification_notSatisfied() {
+  public void testCountQuerySpecification_notSatisfied() {
 
     repositorySpecificationExecutor.count(new QuerySpecification() {
       @Override
@@ -258,6 +258,16 @@ public class RepositorySpecificationExecutorImplTest {
     });
 
     verify(entityManager, never()).createQuery(anyString());
+  }
+
+  @Test(expected = IllegalArgumentException.class)
+  public void testFindQuerySpecification_UnsupportedThrowsIllegalArgException() {
+    repositorySpecificationExecutor.find((QuerySpecification) () -> "SELECT * FROM Person");
+  }
+
+  @Test(expected = IllegalArgumentException.class)
+  public void testFindAllQuerySpecification_UnsupportedThrowsIllegalArgException() {
+    repositorySpecificationExecutor.find((QuerySpecification) () -> "SELECT * FROM Person");
   }
 
   @TypedAsSqlResultSetMapping("PersonResultMapping")
@@ -322,7 +332,6 @@ public class RepositorySpecificationExecutorImplTest {
       return jpql;
     }
   }
-
 
   private class PersonSpecification2 extends PersonSpecification {
 
