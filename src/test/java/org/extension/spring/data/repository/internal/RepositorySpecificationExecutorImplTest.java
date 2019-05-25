@@ -1,5 +1,9 @@
 package org.extension.spring.data.repository.internal;
 
+import static org.hamcrest.core.IsEqual.equalTo;
+import static org.hamcrest.core.IsNot.not;
+import static org.hamcrest.core.IsNull.nullValue;
+import static org.junit.Assert.assertThat;
 import static org.mockito.Matchers.anyInt;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
@@ -9,6 +13,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.Collections;
+import java.util.List;
 import javax.persistence.Entity;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityResult;
@@ -39,7 +44,7 @@ public class RepositorySpecificationExecutorImplTest {
   @Mock
   private EntityType<Person> managedType;
 
-  private RepositorySpecificationExecutorImpl repositorySpecificationExecutor;
+  private RepositorySpecificationExecutorImpl<Person, String> repositorySpecificationExecutor;
 
   @Before
   public void setUp() {
@@ -243,9 +248,51 @@ public class RepositorySpecificationExecutorImplTest {
   }
 
   @Test
+  public void testFindAllQuerySpecification_notSatisfied() {
+
+    final List<Person> persons = repositorySpecificationExecutor.findAll(new TypedNativeQuerySpecification() {
+      @Override
+      public String query() {
+        return "SELECT p FROM Person";
+      }
+
+      @Override
+      public boolean isSatisfied() {
+        return false;
+      }
+    });
+
+    assertThat(persons, not(nullValue()));
+    assertThat(persons.size(), equalTo(0));
+
+    verify(entityManager, never()).createQuery(anyString());
+  }
+
+
+  @Test
+  public void testFindQuerySpecification_notSatisfied() {
+
+    final Person person = repositorySpecificationExecutor.find(new TypedQuerySpecification() {
+      @Override
+      public String query() {
+        return "SELECT p FROM Person";
+      }
+
+      @Override
+      public boolean isSatisfied() {
+        return false;
+      }
+    }, Person.class);
+
+    assertThat(person, nullValue());
+
+    verify(entityManager, never()).createQuery(anyString());
+  }
+
+  @Test
   public void testCountQuerySpecification_notSatisfied() {
 
-    repositorySpecificationExecutor.count(new QuerySpecification() {
+    long count = repositorySpecificationExecutor.count(new QuerySpecification() {
       @Override
       public String query() {
         return "SELECT count(*) FROM Person";
@@ -257,6 +304,8 @@ public class RepositorySpecificationExecutorImplTest {
       }
     });
 
+    assertThat(count, equalTo(0L));
+
     verify(entityManager, never()).createQuery(anyString());
   }
 
@@ -267,7 +316,7 @@ public class RepositorySpecificationExecutorImplTest {
 
   @Test(expected = IllegalArgumentException.class)
   public void testFindAllQuerySpecification_UnsupportedThrowsIllegalArgException() {
-    repositorySpecificationExecutor.find((QuerySpecification) () -> "SELECT * FROM Person");
+    repositorySpecificationExecutor.findAll((QuerySpecification) () -> "SELECT * FROM Person");
   }
 
   @TypedAsSqlResultSetMapping("PersonResultMapping")
