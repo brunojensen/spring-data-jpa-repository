@@ -12,6 +12,7 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import javax.persistence.Entity;
@@ -171,7 +172,7 @@ public class RepositorySpecificationExecutorImplTest {
         .thenReturn(typedQuery);
 
     when(typedQuery.getResultList())
-        .thenReturn(List.of(new Person()));
+        .thenReturn(Arrays.asList(new Person()));
 
     final Page<Person> list = repositorySpecificationExecutor.findAll(
         (TypedQuerySpecification) () -> jpql, pageable
