@@ -28,10 +28,14 @@ import org.extension.spring.data.repository.annotations.TypedAsSqlResultSetMappi
 import org.extension.spring.data.repository.specification.QuerySpecification;
 import org.extension.spring.data.repository.specification.TypedNativeQuerySpecification;
 import org.extension.spring.data.repository.specification.TypedQuerySpecification;
+import org.hamcrest.core.IsEqual;
+import org.hamcrest.core.IsNot;
+import org.hamcrest.core.IsNull;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 
@@ -57,6 +61,85 @@ public class RepositorySpecificationExecutorImplTest {
     );
   }
 
+  /* START TEST FIND METHOD */
+  @Test(expected = IllegalArgumentException.class)
+  public void testFindQuerySpecification_UnsupportedThrowsIllegalArgException() {
+    repositorySpecificationExecutor.find((QuerySpecification) () -> "SELECT * FROM Person");
+  }
+
+  @Test
+  public void testFindQuerySpecification_notSatisfied() {
+
+    final Person person = repositorySpecificationExecutor.find(new TypedQuerySpecification() {
+      @Override
+      public String query() {
+        return "SELECT p FROM Person";
+      }
+
+      @Override
+      public boolean isSatisfied() {
+        return false;
+      }
+    }, Person.class);
+
+    assertThat(person, nullValue());
+
+    verify(entityManager, never()).createQuery(anyString());
+  }
+
+  @Test
+  public void testFindTypedQuerySpecification_Success() {
+
+    final String query = "SELECT p FROM Person";
+
+    final TypedQuery typedQuery = mock(TypedQuery.class);
+
+    when(entityManager.createQuery(eq(query), eq(Person.class)))
+        .thenReturn(typedQuery);
+
+    when(typedQuery.getSingleResult())
+        .thenReturn(new Person());
+
+    final Person person = repositorySpecificationExecutor.find(
+        (TypedQuerySpecification) () -> query, Person.class);
+
+    assertThat(person, not(nullValue()));
+
+    verify(entityManager).createQuery(eq(query), eq(Person.class));
+    verify(typedQuery).getSingleResult();
+  }
+
+  @Test
+  public void testFindTypedNativeQuerySpecification_Success() {
+
+    final String query = "SELECT * FROM Person";
+
+    final Query nativeQuery = mock(TypedQuery.class);
+
+    when(entityManager.createNativeQuery(eq(query), eq(Person.class)))
+        .thenReturn(nativeQuery);
+
+    when(nativeQuery.getSingleResult())
+        .thenReturn(new Person());
+
+    final Person person = repositorySpecificationExecutor.find(
+        (TypedNativeQuerySpecification) () -> query, Person.class);
+
+    assertThat(person, not(nullValue()));
+
+    verify(entityManager).createNativeQuery(eq(query), eq(Person.class));
+    verify(nativeQuery).getSingleResult();
+  }
+
+  /* END TEST FIND METHOD */
+
+  /* START TEST FIND ALL METHOD */
+
+  @Test(expected = IllegalArgumentException.class)
+  public void testFindAllQuerySpecification_UnsupportedThrowsIllegalArgException() {
+    repositorySpecificationExecutor.findAll((QuerySpecification) () -> "SELECT * FROM Person");
+  }
+
   @Test
   public void testFindAllWithTypedQuerySpecification_paging() {
 
@@ -77,9 +160,9 @@ public class RepositorySpecificationExecutorImplTest {
         .thenReturn(queryCount);
 
     when(queryCount.getSingleResult())
-        .thenReturn(10);
+        .thenReturn(1);
 
-    final PageRequest pageable = PageRequest.of(1, 20, Sort.by("email"));
+    final PageRequest pageable = PageRequest.of(0, 20, Sort.by("email"));
 
     when(typedQuery.setFirstResult(anyInt()))
         .thenReturn(typedQuery);
@@ -88,11 +171,14 @@ public class RepositorySpecificationExecutorImplTest {
         .thenReturn(typedQuery);
 
     when(typedQuery.getResultList())
-        .thenReturn(Collections.emptyList());
+        .thenReturn(List.of(new Person()));
 
-    repositorySpecificationExecutor.findAll(
+    final Page<Person> list = repositorySpecificationExecutor.findAll(
         (TypedQuerySpecification) () -> jpql, pageable
     );
+
+    assertThat(list, IsNull.notNullValue());
+    assertThat(list.getTotalElements(), equalTo(1L));
 
     verify(entityManager).createQuery(eq(jpqlSorted), eq(Person.class));
     verify(typedQuery).setFirstResult((int) pageable.getOffset());
@@ -185,27 +271,6 @@ public class RepositorySpecificationExecutorImplTest {
   }
 
   @Test
-  public void testCountWithTypedQuerySpecification() {
-
-    final String jpql = "select count(1) from Person p where p.name like :name";
-
-    final Query query = mock(Query.class);
-
-    when(entityManager.createQuery(eq(jpql)))
-        .thenReturn(query);
-
-    when(query.getSingleResult())
-        .thenReturn(1L);
-
-    repositorySpecificationExecutor.count(
-        (QuerySpecification) () -> "select * from Person p where p.name like :name"
-    );
-
-    verify(entityManager).createQuery(eq(jpql));
-    verify(query).getSingleResult();
-  }
-
-  @Test
   public void testFindAllWithTypedNativeQuerySpecification_withJPAEntity() {
 
     final String jpql = "SELECT * FROM Person";
@@ -250,17 +315,18 @@ public class RepositorySpecificationExecutorImplTest {
   @Test
   public void testFindAllQuerySpecification_notSatisfied() {
 
-    final List<Person> persons = repositorySpecificationExecutor.findAll(new TypedNativeQuerySpecification() {
-      @Override
-      public String query() {
-        return "SELECT p FROM Person";
-      }
+    final List<Person> persons = repositorySpecificationExecutor
+        .findAll(new TypedNativeQuerySpecification() {
+          @Override
+          public String query() {
+            return "SELECT p FROM Person";
+          }
 
-      @Override
-      public boolean isSatisfied() {
-        return false;
-      }
-    });
+          @Override
+          public boolean isSatisfied() {
+            return false;
+          }
+        });
 
     assertThat(persons, not(nullValue()));
     assertThat(persons.size(), equalTo(0));
@@ -268,25 +334,25 @@ public class RepositorySpecificationExecutorImplTest {
     verify(entityManager, never()).createQuery(anyString());
   }
 
-
   @Test
-  public void testFindQuerySpecification_notSatisfied() {
+  public void testCountWithTypedQuerySpecification() {
 
-    final Person person = repositorySpecificationExecutor.find(new TypedQuerySpecification() {
-      @Override
-      public String query() {
-        return "SELECT p FROM Person";
-      }
+    final String jpql = "select count(1) from Person p where p.name like :name";
 
-      @Override
-      public boolean isSatisfied() {
-        return false;
-      }
-    }, Person.class);
+    final Query query = mock(Query.class);
 
-    assertThat(person, nullValue());
+    when(entityManager.createQuery(eq(jpql)))
+        .thenReturn(query);
 
-    verify(entityManager, never()).createQuery(anyString());
+    when(query.getSingleResult())
+        .thenReturn(1L);
+
+    repositorySpecificationExecutor.count(
+        (QuerySpecification) () -> "select * from Person p where p.name like :name"
+    );
+
+    verify(entityManager).createQuery(eq(jpql));
+    verify(query).getSingleResult();
   }
 
   @Test
@@ -309,15 +375,6 @@ public class RepositorySpecificationExecutorImplTest {
     verify(entityManager, never()).createQuery(anyString());
   }
 
-  @Test(expected = IllegalArgumentException.class)
-  public void testFindQuerySpecification_UnsupportedThrowsIllegalArgException() {
-    repositorySpecificationExecutor.find((QuerySpecification) () -> "SELECT * FROM Person");
-  }
-
-  @Test(expected = IllegalArgumentException.class)
-  public void testFindAllQuerySpecification_UnsupportedThrowsIllegalArgException() {
-    repositorySpecificationExecutor.findAll((QuerySpecification) () -> "SELECT * FROM Person");
-  }
 
   @TypedAsSqlResultSetMapping("PersonResultMapping")
   static class PersonResultMapping {

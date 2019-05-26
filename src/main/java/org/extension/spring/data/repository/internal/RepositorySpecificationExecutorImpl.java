@@ -16,6 +16,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.repository.query.QueryUtils;
 import org.springframework.data.jpa.repository.support.JpaEntityInformation;
+import org.springframework.data.jpa.repository.support.JpaEntityInformationSupport;
 import org.springframework.data.jpa.repository.support.SimpleJpaRepository;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
@@ -27,14 +28,13 @@ public class RepositorySpecificationExecutorImpl<T, I extends Serializable>
 
   private final EntityManager entityManager;
 
+  public RepositorySpecificationExecutorImpl(Class<T> domainClass, EntityManager entityManager) {
+    this(JpaEntityInformationSupport.getEntityInformation(domainClass, entityManager), entityManager);
+  }
+
   public RepositorySpecificationExecutorImpl(JpaEntityInformation<T, ?> entityInformation,
       EntityManager entityManager) {
     super(entityInformation, entityManager);
-    this.entityManager = entityManager;
-  }
-
-  public RepositorySpecificationExecutorImpl(Class<T> domainClass, EntityManager entityManager) {
-    super(domainClass, entityManager);
     this.entityManager = entityManager;
   }
 
