@@ -6,7 +6,6 @@ import static org.mockito.Mockito.verify;
 import javax.persistence.Entity;
 import javax.persistence.EntityManager;
 import javax.persistence.Id;
-import org.extension.spring.data.repository.specification.TypedQuerySpecification;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
@@ -25,18 +24,18 @@ public class TypedQuerySpecificationProcessorTest {
   @Test
   public void testProcessorSuccess() {
     final String jpql = "select max(1) from dual";
-    TypedQuerySpecificationProcessor.process(entityManager, Person.class, () -> jpql);
+    new TypedQuerySpecificationProcessor().process(entityManager, () -> jpql, Person.class);
     verify(entityManager).createQuery(eq(jpql), eq(Person.class));
   }
 
   @Test(expected = NullPointerException.class)
   public void testProcessorNullDomainAndSpecificationThrowsNPE() {
-    TypedQuerySpecificationProcessor.process(entityManager, null, null);
+    new TypedQuerySpecificationProcessor().process(entityManager, null, null);
   }
 
   @Test(expected = NullPointerException.class)
   public void testProcessorNullEntityManagerThrowsNPE() {
-    TypedQuerySpecificationProcessor.process(null, Person.class, () -> "SELECT 1");
+    new TypedQuerySpecificationProcessor().process(null, () -> "SELECT 1", Person.class);
   }
 
   @Entity

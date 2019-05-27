@@ -25,17 +25,17 @@ public class NativeQuerySpecificationProcessorTest {
   @Test
   public void testProcessorSuccess() {
     final String jpql = "select max(1) from dual";
-    NativeQuerySpecificationProcessor.process(entityManager, () -> jpql);
+    new NativeQuerySpecificationProcessor().process(entityManager, () -> jpql, null);
     verify(entityManager).createNativeQuery(eq(jpql));
   }
 
   @Test(expected = NullPointerException.class)
   public void testProcessorNullSpecificationThrowsNPE() {
-    NativeQuerySpecificationProcessor.process(entityManager, null);
+    new NativeQuerySpecificationProcessor().process(entityManager, null, null);
   }
 
   @Test(expected = NullPointerException.class)
   public void testProcessorNullEntityManagerThrowsNPE() {
-    NativeQuerySpecificationProcessor.process(null, () -> "SELECT 1");
+    new NativeQuerySpecificationProcessor().process(null, () -> "SELECT 1", null);
   }
 }

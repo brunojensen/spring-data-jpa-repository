@@ -63,9 +63,19 @@ public class RepositorySpecificationExecutorImplTest {
   }
 
   /* START TEST FIND METHOD */
-  @Test(expected = IllegalArgumentException.class)
-  public void testFindQuerySpecification_UnsupportedThrowsIllegalArgException() {
-    repositorySpecificationExecutor.find((QuerySpecification) () -> "SELECT * FROM Person");
+  @Test
+  public void testFindQuerySpecification() {
+    final Query mockedQuery = mock(Query.class);
+
+    final String query = "SELECT email FROM Person";
+
+    when(entityManager.createQuery(eq(query)))
+        .thenReturn(mockedQuery);
+
+    when(mockedQuery.getSingleResult())
+        .thenReturn("");
+
+    repositorySpecificationExecutor.find((QuerySpecification) () -> query, String.class);
   }
 
   @Test
@@ -115,7 +125,7 @@ public class RepositorySpecificationExecutorImplTest {
 
     final String query = "SELECT * FROM Person";
 
-    final Query nativeQuery = mock(TypedQuery.class);
+    final Query nativeQuery = mock(Query.class);
 
     when(entityManager.createNativeQuery(eq(query), eq(Person.class)))
         .thenReturn(nativeQuery);
@@ -136,9 +146,19 @@ public class RepositorySpecificationExecutorImplTest {
 
   /* START TEST FIND ALL METHOD */
 
-  @Test(expected = IllegalArgumentException.class)
-  public void testFindAllQuerySpecification_UnsupportedThrowsIllegalArgException() {
-    repositorySpecificationExecutor.findAll((QuerySpecification) () -> "SELECT * FROM Person");
+  @Test
+  public void testFindAllQuerySpecification() {
+    final Query mockedQuery = mock(Query.class);
+
+    final String query = "SELECT email FROM Person";
+
+    when(entityManager.createQuery(eq(query)))
+        .thenReturn(mockedQuery);
+
+    when(mockedQuery.getSingleResult())
+        .thenReturn("");
+
+    repositorySpecificationExecutor.findAll((QuerySpecification) () -> query, String.class);
   }
 
   @Test
@@ -157,7 +177,7 @@ public class RepositorySpecificationExecutorImplTest {
 
     final TypedQuery queryCount = mock(TypedQuery.class);
 
-    when(entityManager.createQuery(eq(jpqlCount)))
+    when(entityManager.createQuery(eq(jpqlCount), eq(Person.class)))
         .thenReturn(queryCount);
 
     when(queryCount.getSingleResult())
@@ -338,21 +358,21 @@ public class RepositorySpecificationExecutorImplTest {
   @Test
   public void testCountWithTypedQuerySpecification() {
 
-    final String jpql = "select count(1) from Person p where p.name like :name";
+    final String jpql = "select count(p) from Person p where p.name like :name";
 
-    final Query query = mock(Query.class);
+    final TypedQuery query = mock(TypedQuery.class);
 
-    when(entityManager.createQuery(eq(jpql)))
+    when(entityManager.createQuery(eq(jpql), eq(Person.class)))
         .thenReturn(query);
 
     when(query.getSingleResult())
         .thenReturn(1L);
 
     repositorySpecificationExecutor.count(
-        (QuerySpecification) () -> "select * from Person p where p.name like :name"
+        (TypedQuerySpecification) () -> "select p from Person p where p.name like :name"
     );
 
-    verify(entityManager).createQuery(eq(jpql));
+    verify(entityManager).createQuery(eq(jpql), eq(Person.class));
     verify(query).getSingleResult();
   }
 

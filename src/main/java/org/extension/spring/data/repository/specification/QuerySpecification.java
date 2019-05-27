@@ -1,7 +1,6 @@
 package org.extension.spring.data.repository.specification;
 
 import javax.persistence.Query;
-import org.extension.spring.data.repository.internal.enumeration.QueryType;
 
 /**
  * Query specification for plain sql statement that doesn't requires any type and have the intention
@@ -28,16 +27,6 @@ public interface QuerySpecification extends Specification {
    * @param query - JPA query to setup the parameters
    */
   default void withPredicate(Query query) {
-  }
-
-  /**
-   * Don't override me.
-   *
-   * @return in case of {@link QuerySpecification} must return PLAIN
-   */
-  @Override
-  default QueryType type() {
-    return QueryType.PLAIN;
   }
 
 }

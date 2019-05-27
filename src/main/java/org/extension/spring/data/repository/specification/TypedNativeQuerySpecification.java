@@ -1,6 +1,6 @@
 package org.extension.spring.data.repository.specification;
 
-import org.extension.spring.data.repository.internal.enumeration.QueryType;
+import javax.persistence.Query;
 
 /**
  * Specification to typed native queries.
@@ -10,15 +10,5 @@ import org.extension.spring.data.repository.internal.enumeration.QueryType;
  * or with the JPA entity.
  * </p>
  */
-public interface TypedNativeQuerySpecification extends QuerySpecification {
-
-  /**
-   * Don't override me.
-   *
-   * @return in case of {@link TypedNativeQuerySpecification} must return TYPED_NATIVE
-   */
-  @Override
-  default QueryType type() {
-    return QueryType.TYPED_NATIVE;
-  }
+public interface TypedNativeQuerySpecification extends NativeQuerySpecification {
 }

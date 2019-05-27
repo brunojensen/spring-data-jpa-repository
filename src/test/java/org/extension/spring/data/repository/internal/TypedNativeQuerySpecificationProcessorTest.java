@@ -28,25 +28,25 @@ public class TypedNativeQuerySpecificationProcessorTest {
   @Test
   public void testProcessorSuccess() {
     final String jpql = "select max(1) from dual";
-    TypedNativeQuerySpecificationProcessor.process(entityManager, Person.class, () -> jpql);
+    new TypedNativeQuerySpecificationProcessor().process(entityManager, () -> jpql, Person.class);
     verify(entityManager).createNativeQuery(eq(jpql), eq(Person.class));
   }
 
   @Test
   public void testProcessorSuccessWithResultSetMapping() {
     final String jpql = "select max(1) from dual";
-    TypedNativeQuerySpecificationProcessor.process(entityManager, PersonResultMapping.class, () -> jpql);
+    new TypedNativeQuerySpecificationProcessor().process(entityManager, () -> jpql, PersonResultMapping.class);
     verify(entityManager).createNativeQuery(eq(jpql), eq("PersonResultMapping"));
   }
 
   @Test(expected = NullPointerException.class)
   public void testProcessorNullDomainAndSpecificationThrowsNPE() {
-    TypedNativeQuerySpecificationProcessor.process(entityManager, null, null);
+    new TypedNativeQuerySpecificationProcessor().process(entityManager, null, null);
   }
 
   @Test(expected = NullPointerException.class)
   public void testProcessorNullEntityManagerThrowsNPE() {
-    TypedNativeQuerySpecificationProcessor.process(null, Person.class, () -> "SELECT 1");
+    new TypedNativeQuerySpecificationProcessor().process(null, () -> "SELECT 1", Person.class);
   }
 
   @TypedAsSqlResultSetMapping("PersonResultMapping")
