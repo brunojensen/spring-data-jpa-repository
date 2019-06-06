@@ -6,15 +6,13 @@ import javax.persistence.Query;
 import org.extension.spring.data.repository.annotations.TypedAsSqlResultSetMapping;
 import org.extension.spring.data.repository.specification.TypedNativeQuerySpecification;
 
-class TypedNativeQuerySpecificationProcessor {
+class TypedNativeQuerySpecificationProcessor implements
+    SpecificationProcessor<TypedNativeQuerySpecification, Query> {
 
-  private TypedNativeQuerySpecificationProcessor() {
-  }
-
-  static <T> Query process(EntityManager entityManager, Class<T> domainClass,
-      TypedNativeQuerySpecification specification) {
+  @Override
+  public Query process(EntityManager entityManager, TypedNativeQuerySpecification specification,
+      Class<?> domainClass) {
     Objects.requireNonNull(entityManager);
-    Objects.requireNonNull(domainClass);
     Objects.requireNonNull(specification);
 
     final Query query = createQuery(entityManager, domainClass, specification);
@@ -22,12 +20,16 @@ class TypedNativeQuerySpecificationProcessor {
     return query;
   }
 
-  private static <T> Query createQuery(EntityManager entityManager, Class<T> domainClass,
+  private Query createQuery(EntityManager entityManager, Class<?> domainClass,
       TypedNativeQuerySpecification specification) {
+    if(null == domainClass) {
+      return entityManager.createNativeQuery(specification.query());
+    }
     if (domainClass.isAnnotationPresent(TypedAsSqlResultSetMapping.class)) {
       return entityManager.createNativeQuery(specification.query(),
           domainClass.getAnnotation(TypedAsSqlResultSetMapping.class).value());
     }
     return entityManager.createNativeQuery(specification.query(), domainClass);
   }
+
 }

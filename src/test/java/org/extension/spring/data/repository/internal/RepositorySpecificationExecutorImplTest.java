@@ -29,8 +29,6 @@ import org.extension.spring.data.repository.annotations.TypedAsSqlResultSetMappi
 import org.extension.spring.data.repository.specification.QuerySpecification;
 import org.extension.spring.data.repository.specification.TypedNativeQuerySpecification;
 import org.extension.spring.data.repository.specification.TypedQuerySpecification;
-import org.hamcrest.core.IsEqual;
-import org.hamcrest.core.IsNot;
 import org.hamcrest.core.IsNull;
 import org.junit.Before;
 import org.junit.Test;
@@ -63,9 +61,19 @@ public class RepositorySpecificationExecutorImplTest {
   }
 
   /* START TEST FIND METHOD */
-  @Test(expected = IllegalArgumentException.class)
-  public void testFindQuerySpecification_UnsupportedThrowsIllegalArgException() {
-    repositorySpecificationExecutor.find((QuerySpecification) () -> "SELECT * FROM Person");
+  @Test
+  public void testFindQuerySpecification() {
+    final Query mockedQuery = mock(Query.class);
+
+    final String query = "SELECT email FROM Person";
+
+    when(entityManager.createQuery(eq(query)))
+        .thenReturn(mockedQuery);
+
+    when(mockedQuery.getSingleResult())
+        .thenReturn("");
+
+    repositorySpecificationExecutor.find((QuerySpecification) () -> query, String.class);
   }
 
   @Test
@@ -115,7 +123,7 @@ public class RepositorySpecificationExecutorImplTest {
 
     final String query = "SELECT * FROM Person";
 
-    final Query nativeQuery = mock(TypedQuery.class);
+    final Query nativeQuery = mock(Query.class);
 
     when(entityManager.createNativeQuery(eq(query), eq(Person.class)))
         .thenReturn(nativeQuery);
@@ -136,9 +144,19 @@ public class RepositorySpecificationExecutorImplTest {
 
   /* START TEST FIND ALL METHOD */
 
-  @Test(expected = IllegalArgumentException.class)
-  public void testFindAllQuerySpecification_UnsupportedThrowsIllegalArgException() {
-    repositorySpecificationExecutor.findAll((QuerySpecification) () -> "SELECT * FROM Person");
+  @Test
+  public void testFindAllQuerySpecification() {
+    final Query mockedQuery = mock(Query.class);
+
+    final String query = "SELECT email FROM Person";
+
+    when(entityManager.createQuery(eq(query)))
+        .thenReturn(mockedQuery);
+
+    when(mockedQuery.getSingleResult())
+        .thenReturn("");
+
+    repositorySpecificationExecutor.findAll((QuerySpecification) () -> query, String.class);
   }
 
   @Test
@@ -155,7 +173,7 @@ public class RepositorySpecificationExecutorImplTest {
 
     final String jpqlCount = "select count(p) FROM Person p";
 
-    final TypedQuery queryCount = mock(TypedQuery.class);
+    final Query queryCount = mock(Query.class);
 
     when(entityManager.createQuery(eq(jpqlCount)))
         .thenReturn(queryCount);
@@ -338,7 +356,7 @@ public class RepositorySpecificationExecutorImplTest {
   @Test
   public void testCountWithTypedQuerySpecification() {
 
-    final String jpql = "select count(1) from Person p where p.name like :name";
+    final String jpql = "select count(p) from Person p where p.name like :name";
 
     final Query query = mock(Query.class);
 
@@ -349,10 +367,31 @@ public class RepositorySpecificationExecutorImplTest {
         .thenReturn(1L);
 
     repositorySpecificationExecutor.count(
-        (QuerySpecification) () -> "select * from Person p where p.name like :name"
+        (TypedQuerySpecification) () -> "select p from Person p where p.name like :name"
     );
 
     verify(entityManager).createQuery(eq(jpql));
+    verify(query).getSingleResult();
+  }
+
+  @Test
+  public void testCountWithTypedNativeQuerySpecification() {
+
+    final String jpql = "select count(1) from Person p where p.name like :name";
+
+    final Query query = mock(Query.class);
+
+    when(entityManager.createNativeQuery(eq(jpql)))
+        .thenReturn(query);
+
+    when(query.getSingleResult())
+        .thenReturn(1L);
+
+    repositorySpecificationExecutor.count(
+        (TypedNativeQuerySpecification) () -> "select * from Person p where p.name like :name"
+    );
+
+    verify(entityManager).createNativeQuery(eq(jpql));
     verify(query).getSingleResult();
   }
 

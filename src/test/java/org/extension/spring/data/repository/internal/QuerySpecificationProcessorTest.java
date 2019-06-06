@@ -22,17 +22,17 @@ public class QuerySpecificationProcessorTest {
   @Test
   public void testProcessorSuccess() {
     final String jpql = "select max(1) from dual";
-    QuerySpecificationProcessor.process(entityManager, () -> jpql);
+    new QuerySpecificationProcessor().process(entityManager, () -> jpql, null);
     verify(entityManager).createQuery(eq(jpql));
   }
 
   @Test(expected = NullPointerException.class)
   public void testProcessorNullSpecificationThrowsNPE() {
-    QuerySpecificationProcessor.process(entityManager, null);
+    new QuerySpecificationProcessor().process(entityManager, null, null);
   }
 
   @Test(expected = NullPointerException.class)
   public void testProcessorNullEntityManagerThrowsNPE() {
-    QuerySpecificationProcessor.process(null, () -> "SELECT 1");
+    new QuerySpecificationProcessor().process(null, () -> "SELECT 1", null);
   }
 }
