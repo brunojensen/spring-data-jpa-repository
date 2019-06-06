@@ -5,11 +5,11 @@ import java.util.Collections;
 import java.util.List;
 import javax.persistence.EntityManager;
 import javax.persistence.Query;
-import javax.persistence.TypedQuery;
 import org.extension.spring.data.repository.RepositorySpecificationExecutor;
 import org.extension.spring.data.repository.specification.NativeQuerySpecification;
 import org.extension.spring.data.repository.specification.QuerySpecification;
 import org.extension.spring.data.repository.specification.Specification;
+import org.extension.spring.data.repository.specification.TypedNativeQuerySpecification;
 import org.extension.spring.data.repository.specification.TypedQuerySpecification;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -17,7 +17,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.repository.query.QueryUtils;
 import org.springframework.data.jpa.repository.support.JpaEntityInformation;
-import org.springframework.data.jpa.repository.support.JpaEntityInformationSupport;
 import org.springframework.data.jpa.repository.support.SimpleJpaRepository;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
@@ -76,18 +75,17 @@ public class RepositorySpecificationExecutorImpl<T, I extends Serializable>
 
   @SuppressWarnings("unchecked")
   @Override
-  public <P> Page<P> findAll(Specification specification, Pageable pageable,
-      Class<P> projectionType) {
+  public <P> Page<P> findAll(Specification specification, Pageable pageable, Class<P> projectionType) {
     if (specification.isSatisfied()) {
       return new PageImpl<>(
           RepositorySpecificationRegistry
               .lookup(specification.getClass())
-              .process(entityManager, new SortQueryFor((QuerySpecification) specification, pageable.getSort()), projectionType)
+              .process(entityManager, new SortQueryFor((QuerySpecification) specification, pageable.getSort()) , projectionType)
               .setFirstResult((int) pageable.getOffset())
               .setMaxResults(pageable.getPageSize())
               .getResultList(),
           pageable,
-          count(new CountQueryFor((QuerySpecification) specification)));
+          count(specification));
     }
     return new PageImpl<>(Collections.emptyList());
   }
@@ -97,7 +95,7 @@ public class RepositorySpecificationExecutorImpl<T, I extends Serializable>
     if (specification.isSatisfied()) {
       return ((Number) RepositorySpecificationRegistry
                         .lookup(specification.getClass())
-                        .process(entityManager, new CountQueryFor((QuerySpecification) specification), getDomainClass())
+                        .process(entityManager, new CountQueryFor((QuerySpecification) specification), null)
                         .getSingleResult())
               .longValue();
     }
@@ -105,7 +103,7 @@ public class RepositorySpecificationExecutorImpl<T, I extends Serializable>
   }
 
   private static final class CountQueryFor implements QuerySpecification,
-      NativeQuerySpecification {
+      NativeQuerySpecification, TypedQuerySpecification, TypedNativeQuerySpecification {
 
     private final QuerySpecification querySpecification;
 
@@ -123,13 +121,18 @@ public class RepositorySpecificationExecutorImpl<T, I extends Serializable>
     }
 
     @Override
+    public boolean isSatisfied() {
+      return querySpecification.isSatisfied();
+    }
+
+    @Override
     public void withPredicate(Query query) {
       querySpecification.withPredicate(query);
     }
   }
 
   private static final class SortQueryFor implements QuerySpecification,
-      NativeQuerySpecification {
+      NativeQuerySpecification, TypedQuerySpecification, TypedNativeQuerySpecification {
 
     private final QuerySpecification querySpecification;
     private final Sort sort;
@@ -142,6 +145,11 @@ public class RepositorySpecificationExecutorImpl<T, I extends Serializable>
     @Override
     public String query() {
       return QueryUtils.applySorting(querySpecification.query(), sort);
+    }
+
+    @Override
+    public boolean isSatisfied() {
+      return querySpecification.isSatisfied();
     }
 
     @Override

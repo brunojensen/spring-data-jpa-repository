@@ -29,8 +29,6 @@ import org.extension.spring.data.repository.annotations.TypedAsSqlResultSetMappi
 import org.extension.spring.data.repository.specification.QuerySpecification;
 import org.extension.spring.data.repository.specification.TypedNativeQuerySpecification;
 import org.extension.spring.data.repository.specification.TypedQuerySpecification;
-import org.hamcrest.core.IsEqual;
-import org.hamcrest.core.IsNot;
 import org.hamcrest.core.IsNull;
 import org.junit.Before;
 import org.junit.Test;
@@ -175,9 +173,9 @@ public class RepositorySpecificationExecutorImplTest {
 
     final String jpqlCount = "select count(p) FROM Person p";
 
-    final TypedQuery queryCount = mock(TypedQuery.class);
+    final Query queryCount = mock(Query.class);
 
-    when(entityManager.createQuery(eq(jpqlCount), eq(Person.class)))
+    when(entityManager.createQuery(eq(jpqlCount)))
         .thenReturn(queryCount);
 
     when(queryCount.getSingleResult())
@@ -360,9 +358,9 @@ public class RepositorySpecificationExecutorImplTest {
 
     final String jpql = "select count(p) from Person p where p.name like :name";
 
-    final TypedQuery query = mock(TypedQuery.class);
+    final Query query = mock(Query.class);
 
-    when(entityManager.createQuery(eq(jpql), eq(Person.class)))
+    when(entityManager.createQuery(eq(jpql)))
         .thenReturn(query);
 
     when(query.getSingleResult())
@@ -372,7 +370,28 @@ public class RepositorySpecificationExecutorImplTest {
         (TypedQuerySpecification) () -> "select p from Person p where p.name like :name"
     );
 
-    verify(entityManager).createQuery(eq(jpql), eq(Person.class));
+    verify(entityManager).createQuery(eq(jpql));
+    verify(query).getSingleResult();
+  }
+
+  @Test
+  public void testCountWithTypedNativeQuerySpecification() {
+
+    final String jpql = "select count(1) from Person p where p.name like :name";
+
+    final Query query = mock(Query.class);
+
+    when(entityManager.createNativeQuery(eq(jpql)))
+        .thenReturn(query);
+
+    when(query.getSingleResult())
+        .thenReturn(1L);
+
+    repositorySpecificationExecutor.count(
+        (TypedNativeQuerySpecification) () -> "select * from Person p where p.name like :name"
+    );
+
+    verify(entityManager).createNativeQuery(eq(jpql));
     verify(query).getSingleResult();
   }
 

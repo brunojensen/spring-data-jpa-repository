@@ -13,7 +13,6 @@ class TypedNativeQuerySpecificationProcessor implements
   public Query process(EntityManager entityManager, TypedNativeQuerySpecification specification,
       Class<?> domainClass) {
     Objects.requireNonNull(entityManager);
-    Objects.requireNonNull(domainClass);
     Objects.requireNonNull(specification);
 
     final Query query = createQuery(entityManager, domainClass, specification);
@@ -23,6 +22,9 @@ class TypedNativeQuerySpecificationProcessor implements
 
   private Query createQuery(EntityManager entityManager, Class<?> domainClass,
       TypedNativeQuerySpecification specification) {
+    if(null == domainClass) {
+      return entityManager.createNativeQuery(specification.query());
+    }
     if (domainClass.isAnnotationPresent(TypedAsSqlResultSetMapping.class)) {
       return entityManager.createNativeQuery(specification.query(),
           domainClass.getAnnotation(TypedAsSqlResultSetMapping.class).value());

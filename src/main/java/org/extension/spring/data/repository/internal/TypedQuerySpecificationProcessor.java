@@ -3,20 +3,24 @@ package org.extension.spring.data.repository.internal;
 import java.util.Objects;
 import javax.persistence.EntityManager;
 import javax.persistence.Query;
-import javax.persistence.TypedQuery;
 import org.extension.spring.data.repository.specification.TypedQuerySpecification;
 
-class TypedQuerySpecificationProcessor implements SpecificationProcessor<TypedQuerySpecification, TypedQuery<?>> {
+class TypedQuerySpecificationProcessor implements SpecificationProcessor<TypedQuerySpecification, Query> {
 
   @Override
-  public TypedQuery<?> process(EntityManager entityManager, TypedQuerySpecification specification,
+  public Query process(EntityManager entityManager, TypedQuerySpecification specification,
       Class<?> domainClass) {
     Objects.requireNonNull(entityManager);
-    Objects.requireNonNull(domainClass);
     Objects.requireNonNull(specification);
-
-    final TypedQuery<?> query = entityManager.createQuery(specification.query(), domainClass);
+    final Query query = createQuery(entityManager, specification, domainClass);
     specification.withPredicate(query);
     return query;
+  }
+
+  private Query createQuery(EntityManager entityManager, TypedQuerySpecification specification, Class<?> domainClass) {
+    if(null == domainClass) {
+      return entityManager.createQuery(specification.query());
+    }
+    return entityManager.createQuery(specification.query(), domainClass);
   }
 }
