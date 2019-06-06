@@ -1,6 +1,5 @@
 package org.extension.spring.data.repository.internal;
 
-import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -30,9 +29,9 @@ final class RepositorySpecificationRegistry {
               .filter(entry -> entry.getKey().isAssignableFrom(specificationType))
               .findFirst()
               .map(Entry::getValue)
-              .orElseThrow()).getDeclaredConstructor().newInstance();
+              .orElseThrow(() -> new IllegalArgumentException("undefined specification type"))).getDeclaredConstructor().newInstance();
     } catch (Exception e) {
-      throw new RuntimeException(e);
+      throw new UnsupportedOperationException(e);
     }
   }
 
