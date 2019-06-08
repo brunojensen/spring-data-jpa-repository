@@ -35,41 +35,66 @@ public interface PersonRepository extends RepositorySpecificationExecutor<Person
 
 ```java
 ...
+    public Page<Person> searchBy(final Person person, final Pageable pageable) {
+        return repository.findAll(new ByPersonUsingTypedQuerySpecification(person), pageable);
+    }
 
-public List<Person> searchBy(final Person person) {
-    return repository.searchBy(new TypedQuerySpecification<Person>() {
-        
-        @Override
-        public boolean isSatisfied() {
-           return null != person && null != person.getName()
-        }
+    public List<Person> searchBy(final Person person) {
+        return repository.findAll(new ByPersonUsingTypedQuerySpecification(person));
+    }
 
-        @Override
-        public String query() {
-            return "FROM Person WHERE name = :name";
-        }
+    /**
+     * Uses {@link org.springframework.data.jpa.repository.support.SimpleJpaRepository}
+     * implementation
+     */
+    public Person findById(String id) {
+        return repository.findById(id).orElse(null);
+    }
 
-        @Override
-        public void withPredicate(Query query) {
-            query.setParameter(“name”, person.getName());
-        }
-    });
-}
+    /**
+     * Uses {@link org.extension.spring.data.repository.specification.TypedNativeQuerySpecification}
+     * combined with {@link org.extension.spring.data.repository.annotations.TypedAsSqlResultSetMapping}
+     * to use SqlResultMapping to serialize the query result into the pre-defined object.
+     */
+    public List<PersonContactResultMapping> findAll2() {
+        return repository.findAll(new ByPersonContactUsingTypedNativeSpecification(), PersonContactResultMapping.class);
+    }
 
-public long countAll() {
-    // it requires casting for lamba expressions.
-    return repository.count((QuerySpecification) () -> "SELECT count(*) FROM Person");
-}
+    /**
+     * Still capable to quering using annotation {@link org.springframework.data.jpa.repository.Query} and
+     * interface projection
+     */
+    public Page<PersonRecord> findAll(final Pageable pageable) {
+        return repository.findPersonRecord(pageable);
+    }
 
-public Person findByEmail(String email) {
-    return repository.find(new CriteriaQuerySpecification<Person>() {
-        @Override
-        public Predicate toPredicate(Root<Person> r, CriteriaQuery<?> cq, CriteriaBuilder cb) {
-            return cb.equal(r.get("email"), email);
-        }
-    });
-}
+    /**
+     * Uses {@link org.extension.spring.data.repository.specification.TypedNativeQuerySpecification}
+     *      * for count
+     */
+    public List<Person> findAll() {
+        return repository.findAll((TypedQuerySpecification<Person>) () -> "SELECT * FROM Person");
+    }
 
+    /**
+     * Uses {@link org.extension.spring.data.repository.specification.TypedNativeQuerySpecification} with
+     * SELECT * ... for counting.
+     *
+     * The query will be replaced with SELECT count(*)... at execution time.
+     */
+    public long count() {
+        return repository.count(new ByPersonUsingTypedNativeSpecification());
+    }
+
+    /**
+     * Uses {@link org.extension.spring.data.repository.specification.NativeQuerySpecification} with
+     * SELECT * ... for counting.
+     *
+     * The query will be replaced with SELECT count(*)... at execution time.
+     */
+    public long countBy(final Person person) {
+        return repository.count(new ByPersonUsingTypedQuerySpecification(person);
+    }
 ...
 
 ```
