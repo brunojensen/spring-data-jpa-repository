@@ -1,42 +1,29 @@
 package org.extension.spring.data.repository.internal;
 
-import static org.hamcrest.core.IsEqual.equalTo;
-import static org.hamcrest.core.IsNot.not;
-import static org.hamcrest.core.IsNull.nullValue;
-import static org.junit.Assert.assertThat;
-import static org.mockito.Matchers.anyInt;
-import static org.mockito.Matchers.anyString;
-import static org.mockito.Matchers.eq;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-import javax.persistence.Entity;
-import javax.persistence.EntityManager;
-import javax.persistence.EntityResult;
-import javax.persistence.FieldResult;
-import javax.persistence.Id;
-import javax.persistence.Query;
-import javax.persistence.SqlResultSetMapping;
-import javax.persistence.TypedQuery;
-import javax.persistence.metamodel.EntityType;
-import javax.persistence.metamodel.Metamodel;
 import org.extension.spring.data.repository.annotations.TypedAsSqlResultSetMapping;
 import org.extension.spring.data.repository.specification.QuerySpecification;
 import org.extension.spring.data.repository.specification.TypedNativeQuerySpecification;
 import org.extension.spring.data.repository.specification.TypedQuerySpecification;
-import org.hamcrest.core.IsNull;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInstance;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
+
+import javax.persistence.*;
+import javax.persistence.metamodel.EntityType;
+import javax.persistence.metamodel.Metamodel;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.*;
 
 public class RepositorySpecificationExecutorImplTest {
 
@@ -49,14 +36,14 @@ public class RepositorySpecificationExecutorImplTest {
 
   private RepositorySpecificationExecutorImpl<Person, String> repositorySpecificationExecutor;
 
-  @Before
-  public void setUp() {
-    MockitoAnnotations.initMocks(this);
+  @BeforeEach
+  public void init() {
+    MockitoAnnotations.openMocks(this);
     when(entityManager.getMetamodel()).thenReturn(metamodel);
     when(entityManager.getDelegate()).thenReturn(entityManager);
     when(metamodel.managedType(Person.class)).thenReturn(managedType);
     repositorySpecificationExecutor = new RepositorySpecificationExecutorImpl<>(
-        Person.class, entityManager
+      Person.class, entityManager
     );
   }
 
@@ -68,10 +55,10 @@ public class RepositorySpecificationExecutorImplTest {
     final String query = "SELECT email FROM Person";
 
     when(entityManager.createQuery(eq(query)))
-        .thenReturn(mockedQuery);
+      .thenReturn(mockedQuery);
 
     when(mockedQuery.getSingleResult())
-        .thenReturn("");
+      .thenReturn("");
 
     repositorySpecificationExecutor.find((QuerySpecification) () -> query, String.class);
   }
@@ -91,7 +78,7 @@ public class RepositorySpecificationExecutorImplTest {
       }
     }, Person.class);
 
-    assertThat(person, nullValue());
+    assertThat(person).isNull();
 
     verify(entityManager, never()).createQuery(anyString());
   }
@@ -101,18 +88,18 @@ public class RepositorySpecificationExecutorImplTest {
 
     final String query = "SELECT p FROM Person";
 
-    final TypedQuery typedQuery = mock(TypedQuery.class);
+    final TypedQuery<Person> typedQuery = (TypedQuery<Person>) mock(TypedQuery.class);
 
     when(entityManager.createQuery(eq(query), eq(Person.class)))
-        .thenReturn(typedQuery);
+      .thenReturn(typedQuery);
 
     when(typedQuery.getSingleResult())
-        .thenReturn(new Person());
+      .thenReturn(new Person());
 
     final Person person = repositorySpecificationExecutor.find(
-        (TypedQuerySpecification) () -> query, Person.class);
+      (TypedQuerySpecification) () -> query, Person.class);
 
-    assertThat(person, not(nullValue()));
+    assertThat(person).isNotNull();
 
     verify(entityManager).createQuery(eq(query), eq(Person.class));
     verify(typedQuery).getSingleResult();
@@ -126,15 +113,15 @@ public class RepositorySpecificationExecutorImplTest {
     final Query nativeQuery = mock(Query.class);
 
     when(entityManager.createNativeQuery(eq(query), eq(Person.class)))
-        .thenReturn(nativeQuery);
+      .thenReturn(nativeQuery);
 
     when(nativeQuery.getSingleResult())
-        .thenReturn(new Person());
+      .thenReturn(new Person());
 
     final Person person = repositorySpecificationExecutor.find(
-        (TypedNativeQuerySpecification) () -> query, Person.class);
+      (TypedNativeQuerySpecification) () -> query, Person.class);
 
-    assertThat(person, not(nullValue()));
+    assertThat(person).isNotNull();
 
     verify(entityManager).createNativeQuery(eq(query), eq(Person.class));
     verify(nativeQuery).getSingleResult();
@@ -151,10 +138,10 @@ public class RepositorySpecificationExecutorImplTest {
     final String query = "SELECT email FROM Person";
 
     when(entityManager.createQuery(eq(query)))
-        .thenReturn(mockedQuery);
+      .thenReturn(mockedQuery);
 
     when(mockedQuery.getSingleResult())
-        .thenReturn("");
+      .thenReturn("");
 
     repositorySpecificationExecutor.findAll((QuerySpecification) () -> query, String.class);
   }
@@ -169,35 +156,35 @@ public class RepositorySpecificationExecutorImplTest {
     final TypedQuery typedQuery = mock(TypedQuery.class);
 
     when(entityManager.createQuery(eq(jpqlSorted), eq(Person.class)))
-        .thenReturn(typedQuery);
+      .thenReturn(typedQuery);
 
     final String jpqlCount = "select count(p) FROM Person p";
 
     final Query queryCount = mock(Query.class);
 
     when(entityManager.createQuery(eq(jpqlCount)))
-        .thenReturn(queryCount);
+      .thenReturn(queryCount);
 
     when(queryCount.getSingleResult())
-        .thenReturn(1);
+      .thenReturn(1);
 
     final PageRequest pageable = PageRequest.of(0, 20, Sort.by("email"));
 
     when(typedQuery.setFirstResult(anyInt()))
-        .thenReturn(typedQuery);
+      .thenReturn(typedQuery);
 
     when(typedQuery.setMaxResults(anyInt()))
-        .thenReturn(typedQuery);
+      .thenReturn(typedQuery);
 
     when(typedQuery.getResultList())
-        .thenReturn(Arrays.asList(new Person()));
+      .thenReturn(Arrays.asList(new Person()));
 
     final Page<Person> list = repositorySpecificationExecutor.findAll(
-        (TypedQuerySpecification) () -> jpql, pageable
+      (TypedQuerySpecification) () -> jpql, pageable
     );
 
-    assertThat(list, IsNull.notNullValue());
-    assertThat(list.getTotalElements(), equalTo(1L));
+    assertThat(list).isNotNull();
+    assertThat(list).hasSize(1);
 
     verify(entityManager).createQuery(eq(jpqlSorted), eq(Person.class));
     verify(typedQuery).setFirstResult((int) pageable.getOffset());
@@ -214,13 +201,13 @@ public class RepositorySpecificationExecutorImplTest {
     final TypedQuery typedQuery = mock(TypedQuery.class);
 
     when(entityManager.createQuery(eq(jpql), eq(Person.class)))
-        .thenReturn(typedQuery);
+      .thenReturn(typedQuery);
 
     when(typedQuery.getResultList())
-        .thenReturn(Collections.emptyList());
+      .thenReturn(Collections.emptyList());
 
     repositorySpecificationExecutor.findAll(
-        (TypedQuerySpecification) () -> jpql
+      (TypedQuerySpecification) () -> jpql
     );
 
     verify(entityManager).createQuery(eq(jpql), eq(Person.class));
@@ -235,10 +222,10 @@ public class RepositorySpecificationExecutorImplTest {
     final TypedQuery typedQuery = mock(TypedQuery.class);
 
     when(entityManager.createQuery(eq(jpql), eq(Person.class)))
-        .thenReturn(typedQuery);
+      .thenReturn(typedQuery);
 
     when(typedQuery.getResultList())
-        .thenReturn(Collections.emptyList());
+      .thenReturn(Collections.emptyList());
 
     repositorySpecificationExecutor.findAll(new TypedQuerySpecification() {
       @Override
@@ -259,10 +246,10 @@ public class RepositorySpecificationExecutorImplTest {
     final TypedQuery typedQuery = mock(TypedQuery.class);
 
     when(entityManager.createQuery(eq(jpql), eq(Person.class)))
-        .thenReturn(typedQuery);
+      .thenReturn(typedQuery);
 
     when(typedQuery.getResultList())
-        .thenReturn(Collections.emptyList());
+      .thenReturn(Collections.emptyList());
 
     repositorySpecificationExecutor.findAll(new PersonSpecification(jpql));
 
@@ -278,10 +265,10 @@ public class RepositorySpecificationExecutorImplTest {
     final TypedQuery typedQuery = mock(TypedQuery.class);
 
     when(entityManager.createQuery(eq(jpql), eq(Person.class)))
-        .thenReturn(typedQuery);
+      .thenReturn(typedQuery);
 
     when(typedQuery.getResultList())
-        .thenReturn(Collections.emptyList());
+      .thenReturn(Collections.emptyList());
 
     repositorySpecificationExecutor.findAll(new PersonSpecification2(jpql));
 
@@ -297,13 +284,13 @@ public class RepositorySpecificationExecutorImplTest {
     final Query query = mock(Query.class);
 
     when(entityManager.createNativeQuery(eq(jpql), eq(Person.class)))
-        .thenReturn(query);
+      .thenReturn(query);
 
     when(query.getResultList())
-        .thenReturn(Collections.emptyList());
+      .thenReturn(Collections.emptyList());
 
     repositorySpecificationExecutor.findAll(
-        (TypedNativeQuerySpecification) () -> jpql
+      (TypedNativeQuerySpecification) () -> jpql
     );
 
     verify(entityManager).createNativeQuery(eq(jpql), eq(Person.class));
@@ -318,13 +305,13 @@ public class RepositorySpecificationExecutorImplTest {
     final Query query = mock(Query.class);
 
     when(entityManager.createNativeQuery(eq(jpql), eq("PersonResultMapping")))
-        .thenReturn(query);
+      .thenReturn(query);
 
     when(query.getResultList())
-        .thenReturn(Collections.emptyList());
+      .thenReturn(Collections.emptyList());
 
     repositorySpecificationExecutor.findAll(
-        (TypedNativeQuerySpecification) () -> jpql, PersonResultMapping.class
+      (TypedNativeQuerySpecification) () -> jpql, PersonResultMapping.class
     );
 
     verify(entityManager).createNativeQuery(eq(jpql), eq("PersonResultMapping"));
@@ -335,20 +322,20 @@ public class RepositorySpecificationExecutorImplTest {
   public void testFindAllQuerySpecification_notSatisfied() {
 
     final List<Person> persons = repositorySpecificationExecutor
-        .findAll(new TypedNativeQuerySpecification() {
-          @Override
-          public String query() {
-            return "SELECT p FROM Person";
-          }
+      .findAll(new TypedNativeQuerySpecification() {
+        @Override
+        public String query() {
+          return "SELECT p FROM Person";
+        }
 
-          @Override
-          public boolean isSatisfied() {
-            return false;
-          }
-        });
+        @Override
+        public boolean isSatisfied() {
+          return false;
+        }
+      });
 
-    assertThat(persons, not(nullValue()));
-    assertThat(persons.size(), equalTo(0));
+    assertThat(persons).isNotNull();
+    assertThat(persons).hasSize(0);
 
     verify(entityManager, never()).createQuery(anyString());
   }
@@ -361,13 +348,13 @@ public class RepositorySpecificationExecutorImplTest {
     final Query query = mock(Query.class);
 
     when(entityManager.createQuery(eq(jpql)))
-        .thenReturn(query);
+      .thenReturn(query);
 
     when(query.getSingleResult())
-        .thenReturn(1L);
+      .thenReturn(1L);
 
     repositorySpecificationExecutor.count(
-        (TypedQuerySpecification) () -> "select p from Person p where p.name like :name"
+      (TypedQuerySpecification) () -> "select p from Person p where p.name like :name"
     );
 
     verify(entityManager).createQuery(eq(jpql));
@@ -382,13 +369,13 @@ public class RepositorySpecificationExecutorImplTest {
     final Query query = mock(Query.class);
 
     when(entityManager.createNativeQuery(eq(jpql)))
-        .thenReturn(query);
+      .thenReturn(query);
 
     when(query.getSingleResult())
-        .thenReturn(1L);
+      .thenReturn(1L);
 
     repositorySpecificationExecutor.count(
-        (TypedNativeQuerySpecification) () -> "select * from Person p where p.name like :name"
+      (TypedNativeQuerySpecification) () -> "select * from Person p where p.name like :name"
     );
 
     verify(entityManager).createNativeQuery(eq(jpql));
@@ -410,7 +397,7 @@ public class RepositorySpecificationExecutorImplTest {
       }
     });
 
-    assertThat(count, equalTo(0L));
+    assertThat(count).isZero();
 
     verify(entityManager, never()).createQuery(anyString());
   }
@@ -431,13 +418,13 @@ public class RepositorySpecificationExecutorImplTest {
   }
 
   @SqlResultSetMapping(
-      name = "PersonResultMapping",
-      entities = @EntityResult(
-          entityClass = PersonResultMapping.class,
-          fields = {
-              @FieldResult(name = "name", column = "name")
-          }
-      )
+    name = "PersonResultMapping",
+    entities = @EntityResult(
+      entityClass = PersonResultMapping.class,
+      fields = {
+        @FieldResult(name = "name", column = "name")
+      }
+    )
   )
   @Entity
   public final class Person {

@@ -1,22 +1,26 @@
 package org.extension.spring.data.repository.internal;
 
-import static org.mockito.Matchers.eq;
-import static org.mockito.Mockito.verify;
-
-import javax.persistence.EntityManager;
-import org.junit.Before;
-import org.junit.Test;
+import org.assertj.core.api.Assertions;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInstance;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
+import javax.persistence.EntityManager;
+
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.verify;
+
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 public class QuerySpecificationProcessorTest {
 
   @Mock
   private EntityManager entityManager;
 
-  @Before
+  @BeforeAll
   public void init() {
-    MockitoAnnotations.initMocks(this);
+    MockitoAnnotations.openMocks(this);
   }
 
   @Test
@@ -26,13 +30,18 @@ public class QuerySpecificationProcessorTest {
     verify(entityManager).createQuery(eq(jpql));
   }
 
-  @Test(expected = NullPointerException.class)
+  @Test
   public void testProcessorNullSpecificationThrowsNPE() {
-    new QuerySpecificationProcessor().process(entityManager, null, null);
+    Assertions.assertThatThrownBy(() ->
+      new QuerySpecificationProcessor().process(entityManager, null, null)
+    ).isInstanceOf(NullPointerException.class);
+
   }
 
-  @Test(expected = NullPointerException.class)
+  @Test
   public void testProcessorNullEntityManagerThrowsNPE() {
-    new QuerySpecificationProcessor().process(null, () -> "SELECT 1", null);
+    Assertions.assertThatThrownBy(() ->
+      new QuerySpecificationProcessor().process(null, () -> "SELECT 1", null)
+    ).isInstanceOf(NullPointerException.class);
   }
 }
