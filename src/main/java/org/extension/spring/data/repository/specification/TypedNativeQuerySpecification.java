@@ -1,7 +1,5 @@
 package org.extension.spring.data.repository.specification;
 
-import javax.persistence.Query;
-
 /**
  * Specification to typed native queries.
  *

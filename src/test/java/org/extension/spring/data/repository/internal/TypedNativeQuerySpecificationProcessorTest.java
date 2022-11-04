@@ -8,7 +8,12 @@ import org.junit.jupiter.api.TestInstance;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
-import javax.persistence.*;
+import javax.persistence.Entity;
+import javax.persistence.EntityManager;
+import javax.persistence.EntityResult;
+import javax.persistence.FieldResult;
+import javax.persistence.Id;
+import javax.persistence.SqlResultSetMapping;
 
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
