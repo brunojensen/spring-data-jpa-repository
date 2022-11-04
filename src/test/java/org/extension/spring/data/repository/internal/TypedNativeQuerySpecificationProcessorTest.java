@@ -1,28 +1,27 @@
 package org.extension.spring.data.repository.internal;
 
-import static org.mockito.Matchers.eq;
-import static org.mockito.Mockito.verify;
-
-import javax.persistence.Entity;
-import javax.persistence.EntityManager;
-import javax.persistence.EntityResult;
-import javax.persistence.FieldResult;
-import javax.persistence.Id;
-import javax.persistence.SqlResultSetMapping;
+import org.assertj.core.api.Assertions;
 import org.extension.spring.data.repository.annotations.TypedAsSqlResultSetMapping;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInstance;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
+import javax.persistence.*;
+
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.verify;
+
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 public class TypedNativeQuerySpecificationProcessorTest {
 
   @Mock
   private EntityManager entityManager;
 
-  @Before
+  @BeforeAll
   public void init() {
-    MockitoAnnotations.initMocks(this);
+    MockitoAnnotations.openMocks(this);
   }
 
   @Test
@@ -39,20 +38,24 @@ public class TypedNativeQuerySpecificationProcessorTest {
     verify(entityManager).createNativeQuery(eq(jpql), eq("PersonResultMapping"));
   }
 
-  @Test(expected = NullPointerException.class)
+  @Test
   public void testProcessorNullDomainAndSpecificationThrowsNPE() {
-    new TypedNativeQuerySpecificationProcessor().process(entityManager, null, null);
+    Assertions.assertThatThrownBy(() ->
+      new TypedNativeQuerySpecificationProcessor().process(entityManager, null, null)
+    ).isInstanceOf(NullPointerException.class);
   }
 
-  @Test(expected = NullPointerException.class)
+  @Test
   public void testProcessorNullEntityManagerThrowsNPE() {
-    new TypedNativeQuerySpecificationProcessor().process(null, () -> "SELECT 1", Person.class);
+    Assertions.assertThatThrownBy(() ->
+      new TypedNativeQuerySpecificationProcessor().process(null, () -> "SELECT 1", Person.class)
+    ).isInstanceOf(NullPointerException.class);
   }
 
   @TypedAsSqlResultSetMapping("PersonResultMapping")
   static class PersonResultMapping {
 
-    private String name;
+    private final String name;
 
     public PersonResultMapping(String name) {
       this.name = name;
@@ -64,16 +67,16 @@ public class TypedNativeQuerySpecificationProcessorTest {
   }
 
   @SqlResultSetMapping(
-      name = "PersonResultMapping",
-      entities = @EntityResult(
-          entityClass = PersonResultMapping.class,
-          fields = {
-              @FieldResult(name = "name", column = "name")
-          }
-      )
+    name = "PersonResultMapping",
+    entities = @EntityResult(
+      entityClass = PersonResultMapping.class,
+      fields = {
+        @FieldResult(name = "name", column = "name")
+      }
+    )
   )
   @Entity
-  public final class Person {
+  static final class Person {
 
     @Id
     private String id;

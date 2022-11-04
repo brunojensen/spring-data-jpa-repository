@@ -3,6 +3,7 @@ package org.extension.spring.data.repository.internal;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Map.Entry;
+
 import org.extension.spring.data.repository.specification.NativeQuerySpecification;
 import org.extension.spring.data.repository.specification.QuerySpecification;
 import org.extension.spring.data.repository.specification.TypedNativeQuerySpecification;
@@ -22,14 +23,15 @@ final class RepositorySpecificationRegistry {
   private RepositorySpecificationRegistry() {
   }
 
+  @SuppressWarnings("rawtypes")
   static SpecificationProcessor lookup(Class<?> specificationType) {
     try {
       return (SpecificationProcessor) registry.getOrDefault(specificationType,
-          registry.entrySet().stream()
-              .filter(entry -> entry.getKey().isAssignableFrom(specificationType))
-              .findFirst()
-              .map(Entry::getValue)
-              .orElseThrow(() -> new IllegalArgumentException("undefined specification type"))).getDeclaredConstructor().newInstance();
+        registry.entrySet().stream()
+          .filter(entry -> entry.getKey().isAssignableFrom(specificationType))
+          .findFirst()
+          .map(Entry::getValue)
+          .orElseThrow(() -> new IllegalArgumentException("undefined specification type"))).getDeclaredConstructor().newInstance();
     } catch (Exception e) {
       throw new UnsupportedOperationException(e);
     }
