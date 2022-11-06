@@ -79,70 +79,69 @@ public class RepositorySpecificationExecutorImpl<T, I extends Serializable>
   public <P> Page<P> findAll(Specification specification, Pageable pageable, Class<P> projectionType) {
     if (specification.isSatisfied()) {
       long count = count(specification);
-      if(count > 0) {
+      if (count > 0) {
         return new PageImpl<>(
-                RepositorySpecificationRegistry.lookup(specification.getClass())
-                .create(entityManager, new SortQueryFor((QuerySpecification) specification, pageable.getSort()), projectionType)
-                .setFirstResult((int) pageable.getOffset())
-                .setMaxResults(pageable.getPageSize())
-                .getResultList(),
-                pageable,
-                count);
+          RepositorySpecificationRegistry.lookup(specification.getClass())
+            .create(entityManager, new SortQueryFor(specification, pageable.getSort()), projectionType)
+            .setFirstResult((int) pageable.getOffset())
+            .setMaxResults(pageable.getPageSize())
+            .getResultList(),
+          pageable,
+          count);
       }
     }
     return new PageImpl<>(Collections.emptyList());
   }
 
-  @SuppressWarnings("unchecked")
   public long count(Specification specification) {
     if (specification.isSatisfied()) {
       return ((Number) RepositorySpecificationRegistry.lookup(specification.getClass())
-        .create(entityManager, new CountQueryFor((QuerySpecification) specification), null)
+        .create(entityManager, new CountQueryFor(specification), null)
         .getSingleResult())
         .longValue();
     }
     return 0;
   }
 
-  private record CountQueryFor(QuerySpecification querySpecification) implements QuerySpecification,
-      NativeQuerySpecification, TypedQuerySpecification, TypedNativeQuerySpecification {
+  private record CountQueryFor(Specification specification) implements QuerySpecification,
+    NativeQuerySpecification, TypedQuerySpecification, TypedNativeQuerySpecification {
 
-      // Spring marked org.springframework.data.jpa.repository.query.QueryUtils#createCountQueryFor as deprecated
-      // but didn't provide any public implementation.
-      @SuppressWarnings({"deprecation", "squid:CallToDeprecatedMethod"})
-      @Override
-      public String query() {
-        return QueryUtils.createCountQueryFor(querySpecification.query(),
-          "*".equals(QueryUtils.getProjection(querySpecification.query())) ? "1" : null);
-      }
-
-      @Override
-      public boolean isSatisfied() {
-        return querySpecification.isSatisfied();
-      }
-
-      @Override
-      public void withPredicate(Query query) {
-        querySpecification.withPredicate(query);
-      }
+    // Spring marked org.springframework.data.jpa.repository.query.QueryUtils#createCountQueryFor as deprecated
+    // but didn't provide any public implementation.
+    @SuppressWarnings({"deprecation", "squid:CallToDeprecatedMethod"})
+    @Override
+    public String query() {
+      return QueryUtils.createCountQueryFor(specification.query(),
+        "*".equals(QueryUtils.getProjection(specification.query())) ? "1" : null);
     }
-
-  private record SortQueryFor(QuerySpecification querySpecification, Sort sort) implements QuerySpecification,
-      NativeQuerySpecification, TypedQuerySpecification, TypedNativeQuerySpecification {
 
     @Override
-      public String query() {
-        return QueryUtils.applySorting(querySpecification.query(), sort);
-      }
-
-      @Override
-      public boolean isSatisfied() {
-        return querySpecification.isSatisfied();
-      }
-
-      @Override
-      public void withPredicate(Query query) {
-        querySpecification.withPredicate(query);
-      }
+    public boolean isSatisfied() {
+      return specification.isSatisfied();
     }
+
+    @Override
+    public void withPredicate(Query query) {
+      specification.withPredicate(query);
+    }
+  }
+
+  private record SortQueryFor(Specification specification, Sort sort) implements QuerySpecification,
+    NativeQuerySpecification, TypedQuerySpecification, TypedNativeQuerySpecification {
+
+    @Override
+    public String query() {
+      return QueryUtils.applySorting(specification.query(), sort);
+    }
+
+    @Override
+    public boolean isSatisfied() {
+      return specification.isSatisfied();
+    }
+
+    @Override
+    public void withPredicate(Query query) {
+      specification.withPredicate(query);
+    }
+  }
 }

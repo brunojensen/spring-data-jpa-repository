@@ -10,11 +10,11 @@ import org.extension.spring.data.repository.specification.TypedQuerySpecificatio
 
 final class RepositorySpecificationRegistry {
 
-  private static final Map<Class<?>, Class<?>> registry = Map.ofEntries(
-    Map.entry(TypedNativeQuerySpecification.class, TypedNativeQuerySpecificationQueryCreator.class),
-    Map.entry(TypedQuerySpecification.class, TypedQuerySpecificationQueryCreator.class),
-    Map.entry(NativeQuerySpecification.class, NativeQuerySpecificationQueryCreator.class),
-    Map.entry(QuerySpecification.class, QuerySpecificationQueryCreator.class)
+  private static final Map<Class<?>, Class<?>> registry = Map.of(
+    TypedNativeQuerySpecification.class, TypedNativeQuerySpecificationQueryCreator.class,
+    TypedQuerySpecification.class, TypedQuerySpecificationQueryCreator.class,
+    NativeQuerySpecification.class, NativeQuerySpecificationQueryCreator.class,
+    QuerySpecification.class, QuerySpecificationQueryCreator.class
   );
 
   private RepositorySpecificationRegistry() {
