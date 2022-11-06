@@ -23,7 +23,7 @@ final class RepositorySpecificationRegistry {
   @SuppressWarnings("unchecked")
   static <T> SpecificationQueryCreator<T, ?> lookup(Class<?> specificationType) {
     try {
-      return (SpecificationQueryCreator<T, ?>) registry.getOrDefault(specificationType, internalLookup(specificationType))
+      return (SpecificationQueryCreator<T, ?>) internalLookup(specificationType)
                                                     .getDeclaredConstructor()
                                                     .newInstance();
     } catch (Exception e) {
