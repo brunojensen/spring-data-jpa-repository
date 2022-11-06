@@ -13,7 +13,7 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-public class QuerySpecificationProcessorTest {
+public class QuerySpecificationQueryCreatorTest {
 
   @Mock
   private EntityManager entityManager;
@@ -24,24 +24,24 @@ public class QuerySpecificationProcessorTest {
   }
 
   @Test
-  public void testProcessorSuccess() {
+  public void testSuccess() {
     final String jpql = "select max(1) from dual";
-    new QuerySpecificationProcessor().process(entityManager, () -> jpql, null);
+    new QuerySpecificationQueryCreator().create(entityManager, () -> jpql, null);
     verify(entityManager).createQuery(eq(jpql));
   }
 
   @Test
-  public void testProcessorNullSpecificationThrowsNPE() {
+  public void testNullSpecificationThrowsNPE() {
     Assertions.assertThatThrownBy(() ->
-      new QuerySpecificationProcessor().process(entityManager, null, null)
+      new QuerySpecificationQueryCreator().create(entityManager, null, null)
     ).isInstanceOf(NullPointerException.class);
 
   }
 
   @Test
-  public void testProcessorNullEntityManagerThrowsNPE() {
+  public void testNullEntityManagerThrowsNPE() {
     Assertions.assertThatThrownBy(() ->
-      new QuerySpecificationProcessor().process(null, () -> "SELECT 1", null)
+      new QuerySpecificationQueryCreator().create(null, () -> "SELECT 1", null)
     ).isInstanceOf(NullPointerException.class);
   }
 }

@@ -15,7 +15,7 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-public class TypedQuerySpecificationProcessorTest {
+public class TypedQuerySpecificationQueryCreatorTest {
 
   @Mock
   private EntityManager entityManager;
@@ -26,23 +26,23 @@ public class TypedQuerySpecificationProcessorTest {
   }
 
   @Test
-  public void testProcessorSuccess() {
+  public void testSuccess() {
     final String jpql = "select max(1) from dual";
-    new TypedQuerySpecificationProcessor().process(entityManager, () -> jpql, Person.class);
+    new TypedQuerySpecificationQueryCreator().create(entityManager, () -> jpql, Person.class);
     verify(entityManager).createQuery(eq(jpql), eq(Person.class));
   }
 
   @Test
-  public void testProcessorNullDomainAndSpecificationThrowsNPE() {
+  public void testNullDomainAndSpecificationThrowsNPE() {
     Assertions.assertThatThrownBy(() ->
-      new TypedQuerySpecificationProcessor().process(entityManager, null, null)
+      new TypedQuerySpecificationQueryCreator().create(entityManager, null, null)
     ).isInstanceOf(NullPointerException.class);
   }
 
   @Test
-  public void testProcessorNullEntityManagerThrowsNPE() {
+  public void testNullEntityManagerThrowsNPE() {
     Assertions.assertThatThrownBy(() ->
-      new TypedQuerySpecificationProcessor().process(null, () -> "SELECT 1", Person.class)
+      new TypedQuerySpecificationQueryCreator().create(null, () -> "SELECT 1", Person.class)
     ).isInstanceOf(NullPointerException.class);
   }
 

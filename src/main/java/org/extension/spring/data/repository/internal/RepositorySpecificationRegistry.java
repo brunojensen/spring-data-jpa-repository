@@ -1,6 +1,5 @@
 package org.extension.spring.data.repository.internal;
 
-import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 
@@ -11,30 +10,33 @@ import org.extension.spring.data.repository.specification.TypedQuerySpecificatio
 
 final class RepositorySpecificationRegistry {
 
-  private static final Map<Class<?>, Class<?>> registry = new LinkedHashMap<>();
-
-  static {
-    registry.put(TypedNativeQuerySpecification.class, TypedNativeQuerySpecificationProcessor.class);
-    registry.put(TypedQuerySpecification.class, TypedQuerySpecificationProcessor.class);
-    registry.put(NativeQuerySpecification.class, NativeQuerySpecificationProcessor.class);
-    registry.put(QuerySpecification.class, QuerySpecificationProcessor.class);
-  }
+  private static final Map<Class<?>, Class<?>> registry = Map.ofEntries(
+    Map.entry(TypedNativeQuerySpecification.class, TypedNativeQuerySpecificationQueryCreator.class),
+    Map.entry(TypedQuerySpecification.class, TypedQuerySpecificationQueryCreator.class),
+    Map.entry(NativeQuerySpecification.class, NativeQuerySpecificationQueryCreator.class),
+    Map.entry(QuerySpecification.class, QuerySpecificationQueryCreator.class)
+  );
 
   private RepositorySpecificationRegistry() {
   }
 
-  @SuppressWarnings("rawtypes")
-  static SpecificationProcessor lookup(Class<?> specificationType) {
+  @SuppressWarnings("unchecked")
+  static <T> SpecificationQueryCreator<T, ?> lookup(Class<?> specificationType) {
     try {
-      return (SpecificationProcessor) registry.getOrDefault(specificationType,
-        registry.entrySet().stream()
-          .filter(entry -> entry.getKey().isAssignableFrom(specificationType))
-          .findFirst()
-          .map(Entry::getValue)
-          .orElseThrow(() -> new IllegalArgumentException("undefined specification type"))).getDeclaredConstructor().newInstance();
+      return (SpecificationQueryCreator<T, ?>) registry.getOrDefault(specificationType, internalLookup(specificationType))
+                                                    .getDeclaredConstructor()
+                                                    .newInstance();
     } catch (Exception e) {
       throw new UnsupportedOperationException(e);
     }
+  }
+
+  private static Class<?> internalLookup(Class<?> specificationType) {
+    return registry.entrySet().stream()
+      .filter(entry -> entry.getKey().isAssignableFrom(specificationType))
+      .findFirst()
+      .map(Entry::getValue)
+      .orElseThrow(() -> new IllegalArgumentException("Illegal specification type"));
   }
 
 }

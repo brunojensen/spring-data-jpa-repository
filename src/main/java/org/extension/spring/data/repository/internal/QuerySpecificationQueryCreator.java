@@ -6,11 +6,11 @@ import javax.persistence.Query;
 
 import org.extension.spring.data.repository.specification.QuerySpecification;
 
-final class QuerySpecificationProcessor implements SpecificationProcessor<QuerySpecification, Query> {
+final class QuerySpecificationQueryCreator implements SpecificationQueryCreator<QuerySpecification, Query> {
 
   @Override
-  public Query process(EntityManager entityManager, QuerySpecification specification,
-                       Class<?> domainClass) {
+  public Query create(EntityManager entityManager, QuerySpecification specification,
+                      Class<?> domainClass) {
     Objects.requireNonNull(entityManager);
     Objects.requireNonNull(specification);
 

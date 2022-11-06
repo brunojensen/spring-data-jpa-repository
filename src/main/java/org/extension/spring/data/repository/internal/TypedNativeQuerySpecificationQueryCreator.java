@@ -7,12 +7,12 @@ import javax.persistence.Query;
 import org.extension.spring.data.repository.annotations.TypedAsSqlResultSetMapping;
 import org.extension.spring.data.repository.specification.TypedNativeQuerySpecification;
 
-final class TypedNativeQuerySpecificationProcessor implements
-  SpecificationProcessor<TypedNativeQuerySpecification, Query> {
+final class TypedNativeQuerySpecificationQueryCreator implements
+  SpecificationQueryCreator<TypedNativeQuerySpecification, Query> {
 
   @Override
-  public Query process(EntityManager entityManager, TypedNativeQuerySpecification specification,
-                       Class<?> domainClass) {
+  public Query create(EntityManager entityManager, TypedNativeQuerySpecification specification,
+                      Class<?> domainClass) {
     Objects.requireNonNull(entityManager);
     Objects.requireNonNull(specification);
 

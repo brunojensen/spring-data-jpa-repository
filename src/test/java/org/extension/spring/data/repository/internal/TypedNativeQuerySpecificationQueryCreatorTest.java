@@ -19,7 +19,7 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-public class TypedNativeQuerySpecificationProcessorTest {
+public class TypedNativeQuerySpecificationQueryCreatorTest {
 
   @Mock
   private EntityManager entityManager;
@@ -30,30 +30,30 @@ public class TypedNativeQuerySpecificationProcessorTest {
   }
 
   @Test
-  public void testProcessorSuccess() {
+  public void testSuccess() {
     final String jpql = "select max(1) from dual";
-    new TypedNativeQuerySpecificationProcessor().process(entityManager, () -> jpql, Person.class);
+    new TypedNativeQuerySpecificationQueryCreator().create(entityManager, () -> jpql, Person.class);
     verify(entityManager).createNativeQuery(eq(jpql), eq(Person.class));
   }
 
   @Test
-  public void testProcessorSuccessWithResultSetMapping() {
+  public void testSuccessWithResultSetMapping() {
     final String jpql = "select max(1) from dual";
-    new TypedNativeQuerySpecificationProcessor().process(entityManager, () -> jpql, PersonResultMapping.class);
+    new TypedNativeQuerySpecificationQueryCreator().create(entityManager, () -> jpql, PersonResultMapping.class);
     verify(entityManager).createNativeQuery(eq(jpql), eq("PersonResultMapping"));
   }
 
   @Test
-  public void testProcessorNullDomainAndSpecificationThrowsNPE() {
+  public void testNullDomainAndSpecificationThrowsNPE() {
     Assertions.assertThatThrownBy(() ->
-      new TypedNativeQuerySpecificationProcessor().process(entityManager, null, null)
+      new TypedNativeQuerySpecificationQueryCreator().create(entityManager, null, null)
     ).isInstanceOf(NullPointerException.class);
   }
 
   @Test
-  public void testProcessorNullEntityManagerThrowsNPE() {
+  public void testNullEntityManagerThrowsNPE() {
     Assertions.assertThatThrownBy(() ->
-      new TypedNativeQuerySpecificationProcessor().process(null, () -> "SELECT 1", Person.class)
+      new TypedNativeQuerySpecificationQueryCreator().create(null, () -> "SELECT 1", Person.class)
     ).isInstanceOf(NullPointerException.class);
   }
 

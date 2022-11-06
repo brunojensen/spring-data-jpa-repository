@@ -6,11 +6,11 @@ import javax.persistence.Query;
 
 import org.extension.spring.data.repository.specification.TypedQuerySpecification;
 
-final class TypedQuerySpecificationProcessor implements SpecificationProcessor<TypedQuerySpecification, Query> {
+final class TypedQuerySpecificationQueryCreator implements SpecificationQueryCreator<TypedQuerySpecification, Query> {
 
   @Override
-  public Query process(EntityManager entityManager, TypedQuerySpecification specification,
-                       Class<?> domainClass) {
+  public Query create(EntityManager entityManager, TypedQuerySpecification specification,
+                      Class<?> domainClass) {
     Objects.requireNonNull(entityManager);
     Objects.requireNonNull(specification);
     final Query query = createQuery(entityManager, specification, domainClass);
