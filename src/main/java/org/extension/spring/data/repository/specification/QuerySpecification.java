@@ -10,6 +10,6 @@ package org.extension.spring.data.repository.specification;
  * Class)}
  * </p>
  */
-public interface QuerySpecification extends Specification {
+public non-sealed interface QuerySpecification extends Specification {
 
 }

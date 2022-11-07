@@ -8,6 +8,6 @@ package org.extension.spring.data.repository.specification;
  * or with the JPA entity.
  * </p>
  */
-public interface TypedNativeQuerySpecification  extends Specification {
+public non-sealed interface TypedNativeQuerySpecification  extends Specification {
 
 }

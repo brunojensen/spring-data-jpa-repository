@@ -3,10 +3,15 @@ package org.extension.spring.data.repository.specification;
 import javax.persistence.Query;
 
 /**
- * Root interface for the specification pattern. Usually you don't need to deal with this interface,
- * just in case you want to hack the framework.
+ * Root sealed interface for the specification pattern. You don't need to deal with this interface.
+ *
+* @see TypedQuerySpecification
+* @see QuerySpecification
+* @see NativeQuerySpecification
+* @see TypedNativeQuerySpecification
  */
-public interface Specification {
+public sealed interface Specification
+  permits TypedQuerySpecification, QuerySpecification, NativeQuerySpecification, TypedNativeQuerySpecification {
 
   /**
   * Query statement to be executed.

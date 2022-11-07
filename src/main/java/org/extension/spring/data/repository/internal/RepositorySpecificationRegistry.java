@@ -5,14 +5,15 @@ import java.util.Map.Entry;
 
 import org.extension.spring.data.repository.specification.NativeQuerySpecification;
 import org.extension.spring.data.repository.specification.QuerySpecification;
+import org.extension.spring.data.repository.specification.Specification;
 import org.extension.spring.data.repository.specification.TypedNativeQuerySpecification;
 import org.extension.spring.data.repository.specification.TypedQuerySpecification;
 
 final class RepositorySpecificationRegistry {
 
   private static final Map<Class<?>, Class<?>> registry = Map.of(
-    TypedNativeQuerySpecification.class, TypedNativeQuerySpecificationQueryCreator.class,
     TypedQuerySpecification.class, TypedQuerySpecificationQueryCreator.class,
+    TypedNativeQuerySpecification.class, TypedNativeQuerySpecificationQueryCreator.class,
     NativeQuerySpecification.class, NativeQuerySpecificationQueryCreator.class,
     QuerySpecification.class, QuerySpecificationQueryCreator.class
   );
