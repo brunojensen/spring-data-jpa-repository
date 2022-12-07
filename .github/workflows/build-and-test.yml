@@ -1,5 +1,5 @@
 on:
-  [push, pull_request]
+  [ push, pull_request ]
 
 name: Build & Test
 
@@ -15,15 +15,16 @@ jobs:
         uses: actions/setup-java@v3
         with:
           java-version: '17'
-          distribution: 'corretto'
-          cache: maven
+          distribution: 'zulu'
+      - name: Setup Gradle
+        uses: gradle/gradle-build-action@v2
       - name: Test
-        run: mvn clean verify
+        run: ./gradlew clean build test
       - name: Publish coverage report
         if: ${{ github.event_name == 'pull_request' }}
         uses: madrapps/jacoco-report@v1.2
         with:
-          paths: ${{ github.workspace }}/target/site/jacoco/jacoco.xml
+          paths: ${{ github.workspace }}/build/jacoco/test.exec
           token: ${{ secrets.GITHUB_TOKEN }}
           min-coverage-overall: 80
           min-coverage-changed-files: 60

@@ -15,3 +15,5 @@ release.properties
 .idea
 .editorconfig
 .fleet
+.gradle
+build/

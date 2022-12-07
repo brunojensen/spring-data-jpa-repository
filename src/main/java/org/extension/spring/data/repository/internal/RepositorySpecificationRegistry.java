@@ -1,13 +1,12 @@
 package org.extension.spring.data.repository.internal;
 
-import java.util.Map;
-import java.util.Map.Entry;
-
 import org.extension.spring.data.repository.specification.NativeQuerySpecification;
 import org.extension.spring.data.repository.specification.QuerySpecification;
-import org.extension.spring.data.repository.specification.Specification;
 import org.extension.spring.data.repository.specification.TypedNativeQuerySpecification;
 import org.extension.spring.data.repository.specification.TypedQuerySpecification;
+
+import java.util.Map;
+import java.util.Map.Entry;
 
 final class RepositorySpecificationRegistry {
 
